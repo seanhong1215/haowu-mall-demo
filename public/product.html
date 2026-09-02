@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>商品詳情 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container" id="product-content">
+  <div class="product-detail">
+    <div class="gallery">
+      <div class="gallery__main">
+        <img id="gallery-main" src="" alt="">
+      </div>
+      <div class="gallery__thumbs" id="gallery-thumbs"></div>
+    </div>
+
+    <div class="product-info">
+      <div class="product-info__collection" id="product-collection"></div>
+      <h1 id="product-title"></h1>
+      <div id="product-rating" style="margin-bottom:10px;"></div>
+      <span class="price" id="product-price"></span>
+
+      <div id="options-wrap"></div>
+      <div id="stock-note"></div>
+      <p class="viewer-count" id="viewer-count"></p>
+
+      <div class="qty-row">
+        <div class="qty-input">
+          <button id="qty-dec" aria-label="減少數量" type="button">−</button>
+          <input id="qty-input" type="text" readonly value="1" aria-label="數量">
+          <button id="qty-inc" aria-label="增加數量" type="button">+</button>
+        </div>
+        <button id="add-to-cart" class="btn btn--accent" style="flex:1;" type="button">加入購物車</button>
+      </div>
+
+      <p id="product-description" class="product-info__description"></p>
+    </div>
+  </div>
+
+  <section class="section" style="padding-top:0;border-top:1px solid var(--color-border);">
+    <div class="reviews">
+      <div class="reviews__header">
+        <h2 style="margin-bottom:4px;">商品評價</h2>
+        <div id="reviews-summary"></div>
+      </div>
+
+      <div id="reviews-list" class="reviews__list"></div>
+
+      <button id="review-form-toggle" class="btn btn--outline" type="button" style="margin-top:20px;">撰寫評價</button>
+
+      <form id="review-form" class="form-grid review-form" hidden>
+        <h3 style="margin:0;font-size:1.05rem;">撰寫評價</h3>
+        <div class="banner banner--error" id="review-banner" hidden></div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label for="authorName">姓名</label>
+            <input id="authorName" name="authorName" required>
+          </div>
+          <div class="form-row">
+            <label for="rating">評分</label>
+            <select id="rating" name="rating" required>
+              <option value="5">★★★★★ — 非常滿意</option>
+              <option value="4">★★★★☆ — 滿意</option>
+              <option value="3">★★★☆☆ — 普通</option>
+              <option value="2">★★☆☆☆ — 不太滿意</option>
+              <option value="1">★☆☆☆☆ — 不滿意</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="comment">評價內容</label>
+          <textarea id="comment" name="comment" rows="3" required maxlength="2000"></textarea>
+        </div>
+        <button type="submit" class="btn btn--accent" style="align-self:flex-start;">送出評價</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="section-title-bar">
+      <h2>您可能也喜歡</h2>
+    </div>
+    <div class="product-grid" id="related-grid"></div>
+  </section>
+
+  <section class="section" style="padding-top:0;" id="recently-viewed-section" hidden>
+    <div class="section-title-bar">
+      <h2>最近瀏覽</h2>
+    </div>
+    <div class="product-grid" id="recently-viewed-grid"></div>
+  </section>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/star-rating.js"></script>
+<script src="/assets/js/order-timeline.js"></script>
+<script src="/assets/js/product-card.js"></script>
+<script src="/assets/js/product.js"></script>
+</body>
+</html>

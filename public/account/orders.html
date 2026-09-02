@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的訂單 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container" style="padding:32px 0 60px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h1 style="margin-bottom:4px;">我的帳號</h1>
+      <p class="text-muted" id="account-greeting"></p>
+    </div>
+    <button class="btn btn--small btn--outline" id="logout-btn" type="button">登出</button>
+  </div>
+
+  <div id="orders-content"></div>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/order-timeline.js"></script>
+<script src="/assets/js/account-orders.js"></script>
+</body>
+</html>

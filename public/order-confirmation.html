@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>訂單成立 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container">
+  <div class="confirmation" id="confirmation-content">
+    <div class="hero__eyebrow" style="background:var(--color-success);">訂單成立</div>
+    <h1>感謝您的訂購</h1>
+    <p class="text-muted">確認信已「寄送」至 <strong id="order-email"></strong>（demo，不會真的發信）。<span id="order-payment"></span></p>
+    <div class="confirmation__number">訂單編號 #<span id="order-number"></span></div>
+
+    <div id="order-timeline" style="text-align:left;max-width:360px;margin:0 auto 28px;"></div>
+
+    <div style="text-align:left;max-width:360px;margin:0 auto;" id="order-items"></div>
+    <div id="order-totals" style="max-width:360px;margin:0 auto;"></div>
+
+    <a href="/collection.html" class="btn" style="margin-top:32px;">繼續購物</a>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/order-timeline.js"></script>
+<script src="/assets/js/order-confirmation.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>結帳 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container checkout-layout">
+  <div>
+    <h1>結帳</h1>
+    <p class="text-muted" style="margin-bottom:24px;">這是一個 Demo 網站，不會收取真實款項。送出後會在資料庫建立一筆真實訂單，可在賣家後台查看。</p>
+
+    <p class="text-muted" id="account-note" hidden style="margin-top:-16px;margin-bottom:20px;">您已使用會員身分登入 — 這筆訂單會出現在<a href="/account/orders.html">我的訂單</a>中。</p>
+
+    <div class="banner banner--error" id="checkout-banner" hidden></div>
+
+    <form id="checkout-form" class="form-grid">
+      <div class="form-row">
+        <label for="customerName">收件人姓名</label>
+        <input id="customerName" name="customerName" required autocomplete="name">
+      </div>
+      <div class="form-row">
+        <label for="customerEmail">電子郵件</label>
+        <input id="customerEmail" name="customerEmail" type="email" required autocomplete="email">
+      </div>
+      <div class="form-row">
+        <label for="shippingAddress">收件地址</label>
+        <textarea id="shippingAddress" name="shippingAddress" rows="3" required autocomplete="street-address"></textarea>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row">
+          <label for="cardNumber">信用卡卡號 <span class="text-muted">(demo — 不會送到我方伺服器，僅品牌與末四碼會保留)</span></label>
+          <input id="cardNumber" name="cardNumber" placeholder="4242 4242 4242 4242" required>
+          <span class="text-muted" style="font-size:0.8rem;">試試 <code>4242 4242 4242 4242</code> 完成付款，或 <code>4000 0000 0000 0002</code> 體驗交易失敗。</span>
+        </div>
+        <div class="form-row">
+          <label for="cardExpiry">有效期限</label>
+          <input id="cardExpiry" name="cardExpiry" placeholder="12/29" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn--accent btn--block">送出訂單</button>
+    </form>
+  </div>
+
+  <aside class="order-summary">
+    <h3>訂單摘要</h3>
+    <div id="order-summary-lines"></div>
+    <div id="order-summary-totals" style="margin-top:8px;"></div>
+  </aside>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/checkout.js"></script>
+</body>
+</html>

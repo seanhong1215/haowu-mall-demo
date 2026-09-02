@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>好物商城 — 天天好物，件件優惠</title>
+<meta name="description" content="全端電商作品集 Demo：瀏覽、加入購物車、結帳、會員系統 — 以 Cloudflare Pages、Pages Functions、D1 打造。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main>
+  <section class="hero" style="background-image:url('https://picsum.photos/seed/haowu-hero/1800/700');">
+    <div class="hero__content">
+      <div class="hero__eyebrow">全館活動</div>
+      <h1>好物商城週年慶，全館滿990免運</h1>
+      <p>3C家電、美妝保養、時尚服飾、生活居家、食品雜貨——天天都有新優惠。</p>
+      <a href="/collection.html" class="btn" style="background:#fff;color:#e4002b;border-color:#fff;">逛全部商品</a>
+    </div>
+  </section>
+
+  <div class="marquee">
+    <div class="marquee__track">
+      <span>滿990免運</span><span>全站分期0利率</span><span>會員首購享折價券</span><span>全端 Demo — 前後台皆為真實互動</span>
+      <span>滿990免運</span><span>全站分期0利率</span><span>會員首購享折價券</span><span>全端 Demo — 前後台皆為真實互動</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="category-icons" id="category-icons"></div>
+  </div>
+
+  <section class="flash-sale">
+    <div class="container">
+      <div class="flash-sale__header">
+        <div class="flash-sale__title"><span class="icon-emoji">⚡</span>限時搶購</div>
+        <div class="countdown">今日結束倒數 <span id="countdown"></span></div>
+      </div>
+      <div class="product-grid" id="flash-sale-grid">
+        <p style="color:#fff;">商品載入中…</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="coupon-banner">
+      <span>🎁 新會員註冊即享 <strong>NT$100</strong> 購物金</span>
+      <a href="/account/register.html" class="btn btn--small">立即註冊</a>
+    </div>
+  </div>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>🔥 熱銷排行榜 TOP 5</h2>
+      <a href="/collection.html?sort=newest" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="rank-grid"></div>
+  </section>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>💻 3C家電精選</h2>
+      <a href="/collection.html?collection=3C家電" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="cat-grid-3C家電"></div>
+  </section>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>💄 美妝保養推薦</h2>
+      <a href="/collection.html?collection=美妝保養" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="cat-grid-美妝保養"></div>
+  </section>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>👕 時尚服飾嚴選</h2>
+      <a href="/collection.html?collection=時尚服飾" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="cat-grid-時尚服飾"></div>
+  </section>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>🏠 生活居家好物</h2>
+      <a href="/collection.html?collection=生活居家" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="cat-grid-生活居家"></div>
+  </section>
+
+  <section class="section container">
+    <div class="section-title-bar">
+      <h2>🛒 食品雜貨嚴選</h2>
+      <a href="/collection.html?collection=食品雜貨" class="see-all">查看更多 →</a>
+    </div>
+    <div class="product-grid" id="cat-grid-食品雜貨"></div>
+  </section>
+
+  <section class="split">
+    <img src="https://picsum.photos/seed/haowu-story/900/700" alt="倉儲物流中心">
+    <div class="split__text">
+      <div class="hero__eyebrow" style="align-self:flex-start;">關於我們</div>
+      <h2>好物商城，什麼都賣、什麼都不奇怪</h2>
+      <p class="text-muted">從 3C 家電到生活雜貨，我們相信好的購物體驗不該只是「買到東西」，而是快速、安心、划算。這是一個展示全端工程能力的作品集網站，前台瀏覽、會員系統、購物車、結帳、後台管理全部都是真實運作的功能。</p>
+      <a href="/collection.html" class="btn btn--outline" style="align-self:flex-start;">開始購物</a>
+    </div>
+  </section>
+
+  <section class="promo-banner">
+    <div class="container">
+      <h2>下載會員卡，購物滿額回饋更多</h2>
+      <p>登入會員結帳可自動帶入資料、查詢歷史訂單，體驗更完整。</p>
+      <a href="/account/register.html" class="btn">立即加入會員</a>
+    </div>
+  </section>
+
+  <section class="newsletter">
+    <div class="container">
+      <h2>訂閱電子報</h2>
+      <p>掌握最新上架與限時優惠，不錯過每一檔活動。</p>
+      <form id="newsletter-form">
+        <input type="email" placeholder="you@email.com" required aria-label="電子郵件">
+        <button type="submit" class="btn btn--accent">訂閱</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/star-rating.js"></script>
+<script src="/assets/js/product-card.js"></script>
+<script src="/assets/js/home.js"></script>
+</body>
+</html>

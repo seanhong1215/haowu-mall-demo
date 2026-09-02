@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>購物車 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container cart-page">
+  <h1>購物車</h1>
+
+  <div id="cart-empty" class="empty-state" hidden>
+    <p>購物車還是空的。</p>
+    <a href="/collection.html" class="btn">去逛逛</a>
+  </div>
+
+  <div id="cart-wrap" hidden>
+    <table class="cart-table">
+      <thead>
+        <tr><th>商品</th><th>單價</th><th>數量</th><th>小計</th><th></th></tr>
+      </thead>
+      <tbody id="cart-body"></tbody>
+    </table>
+
+    <div class="cart-summary">
+      <div class="cart-summary__row"><span>運費</span><span class="text-muted">結帳時計算</span></div>
+      <div class="cart-summary__row cart-summary__row--total"><span>小計</span><span id="cart-subtotal"></span></div>
+      <a href="/checkout.html" class="btn btn--accent btn--block" style="margin-top:16px;">前往結帳</a>
+    </div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/cart-page.js"></script>
+</body>
+</html>

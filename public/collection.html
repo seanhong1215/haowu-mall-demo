@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全部商品 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main>
+  <div class="collection-header">
+    <h1 id="collection-title">全部商品</h1>
+    <p class="text-muted">資料即時從商店資料庫讀取。</p>
+  </div>
+
+  <div class="container">
+    <div class="toolbar">
+      <div class="chip-group" id="chip-group"></div>
+      <select id="sort-select" aria-label="排序方式">
+        <option value="newest">最新上架</option>
+        <option value="price_asc">價格由低到高</option>
+        <option value="price_desc">價格由高到低</option>
+        <option value="title">名稱排序</option>
+      </select>
+    </div>
+    <div class="product-grid" id="collection-grid"></div>
+  </div>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/star-rating.js"></script>
+<script src="/assets/js/product-card.js"></script>
+<script src="/assets/js/collection.js"></script>
+</body>
+</html>
