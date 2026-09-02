@@ -110,13 +110,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("submit", (e) => {
   if (e.target.id !== "newsletter-form") return;
   e.preventDefault();
-  const btn = e.target.querySelector("button");
+  const form = e.target;
+  const btn = form.querySelector("button");
+  const success = document.getElementById("newsletter-success");
   const original = btn.textContent;
   btn.textContent = "訂閱成功 ✓";
   btn.disabled = true;
+  if (success) success.hidden = false;
   setTimeout(() => {
     btn.textContent = original;
     btn.disabled = false;
-    e.target.reset();
-  }, 2500);
+    if (success) success.hidden = true;
+    form.reset();
+  }, 3500);
 });
