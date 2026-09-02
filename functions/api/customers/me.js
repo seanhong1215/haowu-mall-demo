@@ -2,6 +2,8 @@ import { json, errorJson } from "../../lib/json.js";
 import { currentCustomerId } from "../../lib/auth.js";
 import { hashPassword, verifyPassword } from "../../lib/password.js";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // GET /api/customers/me — lets the header/account pages check login state.
 export async function onRequestGet({ request, env }) {
   const customerId = await currentCustomerId(request, env);
@@ -13,11 +15,10 @@ export async function onRequestGet({ request, env }) {
   return json({ customer: customer || null });
 }
 
-// PATCH /api/customers/me — update the logged-in customer's own name and/or
-// password. Body: { name?, currentPassword?, newPassword? }
-// Changing the password requires the current password; changing the name
-// does not. Email is intentionally not editable here (it's the login
-// identity — changing it would need its own re-verification flow).
+// PATCH /api/customers/me — update the logged-in customer's own name,
+// email, and/or password. Body: { name?, email?, currentPassword?, newPassword? }
+// Changing the password or the email (the login identity) both require the
+// current password; changing just the name does not.
 export async function onRequestPatch({ request, env }) {
   const customerId = await currentCustomerId(request, env);
   if (!customerId) return errorJson("請先登入會員", 401);
@@ -27,6 +28,18 @@ export async function onRequestPatch({ request, env }) {
 
   const customer = await env.DB.prepare(`SELECT * FROM customers WHERE id = ?`).bind(customerId).first();
   if (!customer) return errorJson("找不到此會員", 404);
+
+  const nextEmail = body.email !== undefined ? String(body.email).trim().toLowerCase() : null;
+  const emailChanged = nextEmail !== null && nextEmail !== customer.email;
+  const wantsPasswordChange = Boolean(body.newPassword);
+
+  // Both the login email and the password are sensitive — either change
+  // requires proving you know the current password first.
+  if (emailChanged || wantsPasswordChange) {
+    if (!body.currentPassword) return errorJson("請輸入目前密碼以完成此項變更", 400);
+    const ok = await verifyPassword(body.currentPassword, customer.password_hash, customer.password_salt);
+    if (!ok) return errorJson("目前密碼不正確", 401);
+  }
 
   const fields = [];
   const binds = [];
@@ -38,12 +51,18 @@ export async function onRequestPatch({ request, env }) {
     binds.push(name);
   }
 
-  if (body.newPassword) {
-    if (!body.currentPassword) return errorJson("請輸入目前密碼以變更密碼", 400);
-    const ok = await verifyPassword(body.currentPassword, customer.password_hash, customer.password_salt);
-    if (!ok) return errorJson("目前密碼不正確", 401);
-    if (String(body.newPassword).length < 6) return errorJson("新密碼至少需要 6 個字元", 400);
+  if (emailChanged) {
+    if (!EMAIL_RE.test(nextEmail)) return errorJson("請輸入有效的電子郵件", 400);
+    const existing = await env.DB.prepare(`SELECT id FROM customers WHERE email = ? AND id != ?`)
+      .bind(nextEmail, customerId)
+      .first();
+    if (existing) return errorJson("此電子郵件已被其他帳號使用", 409);
+    fields.push("email = ?");
+    binds.push(nextEmail);
+  }
 
+  if (wantsPasswordChange) {
+    if (String(body.newPassword).length < 6) return errorJson("新密碼至少需要 6 個字元", 400);
     const { hash, salt } = await hashPassword(body.newPassword);
     fields.push("password_hash = ?", "password_salt = ?");
     binds.push(hash, salt);

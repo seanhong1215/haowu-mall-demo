@@ -27,8 +27,12 @@
       </div>
       <div class="form-row">
         <label for="email">電子郵件</label>
-        <input id="email" disabled>
-        <span class="text-muted" style="font-size:0.8rem;">登入信箱暫不開放修改。</span>
+        <input id="email" name="email" type="email" required autocomplete="email">
+        <span class="text-muted" style="font-size:0.8rem;">Email 是登入帳號，變更時需要輸入目前密碼確認身分。</span>
+      </div>
+      <div class="form-row" id="email-password-row" hidden>
+        <label for="currentPasswordForEmail">目前密碼（變更 Email 時需要）</label>
+        <input id="currentPasswordForEmail" name="currentPasswordForEmail" type="password" autocomplete="current-password">
       </div>
       <button type="submit" class="btn btn--accent" style="align-self:flex-start;">儲存變更</button>
     </form>
