@@ -108,6 +108,7 @@ function renderFooter() {
           <ul>
             <li><a href="/account/login.html">會員登入</a></li>
             <li><a href="/account/orders.html">我的訂單</a></li>
+            <li><a href="/account/profile.html">個人資料</a></li>
             <li><a href="/admin/login.html">賣家後台</a></li>
           </ul>
         </div>
