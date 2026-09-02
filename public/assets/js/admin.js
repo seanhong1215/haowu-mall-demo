@@ -33,11 +33,11 @@ function renderOrdersTable(orders) {
           .map(
             (o) => `
           <tr data-id="${o.id}" style="cursor:pointer;" class="order-row">
-            <td>${o.order_number}</td>
-            <td>${o.customer_name}<br><span class="text-muted">${o.customer_email}</span></td>
-            <td>${formatDateTime(o.created_at)}</td>
-            <td>${formatPrice(o.total_cents)}</td>
-            <td>
+            <td data-label="訂單編號">${o.order_number}</td>
+            <td data-label="客戶">${o.customer_name}<br><span class="text-muted">${o.customer_email}</span></td>
+            <td data-label="下單時間">${formatDateTime(o.created_at)}</td>
+            <td data-label="總計">${formatPrice(o.total_cents)}</td>
+            <td data-label="狀態">
               <select data-id="${o.id}" class="status-select">
                 ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
               </select>
@@ -147,10 +147,14 @@ async function loadInventory() {
               .map(
                 (v, i) => `
             <tr>
-              ${i === 0 ? `<td rowspan="${p.variants.length || 1}">${p.title}</td>` : ""}
-              ${i === 0 ? `<td rowspan="${p.variants.length || 1}"><input class="inline-input price-input" data-product="${p.id}" value="${centsToDollarsInput(p.price_cents)}"></td>` : ""}
-              <td>${v ? `${v.option_name}: ${v.value}` : "—"}</td>
-              <td>${
+              <td data-label="商品">${p.title}</td>
+              <td data-label="價格（NT$）">${
+                i === 0
+                  ? `<input class="inline-input price-input" data-product="${p.id}" value="${centsToDollarsInput(p.price_cents)}">`
+                  : `<span class="text-muted">${centsToDollarsInput(p.price_cents)}</span>`
+              }</td>
+              <td data-label="規格">${v ? `${v.option_name}: ${v.value}` : "—"}</td>
+              <td data-label="庫存">${
                 v
                   ? `<input class="inline-input stock-input" data-variant="${v.id}" type="number" min="0" value="${v.inventory}">`
                   : `<span class="text-muted">無</span>`
@@ -204,7 +208,7 @@ async function loadActivity() {
       <thead><tr><th>時間</th><th>內容</th></tr></thead>
       <tbody>
         ${actions
-          .map((a) => `<tr><td style="white-space:nowrap;">${formatDateTime(a.created_at)}</td><td>${a.detail}</td></tr>`)
+          .map((a) => `<tr><td data-label="時間" style="white-space:nowrap;">${formatDateTime(a.created_at)}</td><td data-label="內容">${a.detail}</td></tr>`)
           .join("")}
       </tbody>
     </table>

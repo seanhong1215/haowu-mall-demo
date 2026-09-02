@@ -529,6 +529,25 @@ body.cart-open .cart-drawer { transform: translateX(0); }
 .admin-login { max-width: 400px; margin: 12vh auto; padding: 32px; background: var(--color-surface); border-radius: var(--radius); box-shadow: var(--shadow); }
 .inline-input { width: 70px; padding: 0.4em; border: 1px solid var(--color-border); border-radius: var(--radius); font-size: 0.85rem; }
 .admin-order-detail { background: var(--color-surface); box-shadow: var(--shadow); padding: 24px; margin-top: 16px; }
+
+/* 手機版：後台表格從橫向表格改成堆疊卡片，每個 <td> 靠 data-label 屬性
+   顯示欄位名稱，取代原本只能左右滑動才看得到欄位的做法 */
+@media (max-width: 640px) {
+  .admin-table { min-width: 0; }
+  .admin-table thead { display: none; }
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { display: block; width: 100%; }
+  .admin-table tr { margin-bottom: 12px; border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
+  .admin-table td {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    text-align: right; border-bottom: 1px solid var(--color-border); padding: 10px 14px;
+  }
+  .admin-table td:last-child { border-bottom: none; }
+  .admin-table td::before {
+    content: attr(data-label); font-weight: 700; text-align: left; color: var(--color-text-muted);
+    flex-shrink: 0; font-size: 0.8rem;
+  }
+  .admin-table .inline-input { max-width: 110px; }
+}
 .text-muted { color: var(--color-text-muted); }
 .empty-state { text-align: center; padding: 60px 20px; color: var(--color-text-muted); }
 
