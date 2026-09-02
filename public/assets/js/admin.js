@@ -188,12 +188,38 @@ async function loadInventory() {
   });
 }
 
+async function loadActivity() {
+  const panel = document.getElementById("panel-activity");
+  panel.innerHTML = `<p class="text-muted">載入中…</p>`;
+  const { actions } = await Api.get("/api/admin/actions");
+
+  if (actions.length === 0) {
+    panel.innerHTML = `<p class="empty-state">目前尚無操作紀錄。</p>`;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr><th>時間</th><th>內容</th></tr></thead>
+      <tbody>
+        ${actions
+          .map((a) => `<tr><td style="white-space:nowrap;">${formatDateTime(a.created_at)}</td><td>${a.detail}</td></tr>`)
+          .join("")}
+      </tbody>
+    </table>
+    </div>
+  `;
+}
+
 function switchTab(tab) {
   document.querySelectorAll(".admin-tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.getElementById("panel-orders").hidden = tab !== "orders";
   document.getElementById("panel-inventory").hidden = tab !== "inventory";
+  document.getElementById("panel-activity").hidden = tab !== "activity";
   if (tab === "orders") loadOrders();
   if (tab === "inventory") loadInventory();
+  if (tab === "activity") loadActivity();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

@@ -2,6 +2,7 @@
 -- Run locally:  npx wrangler d1 execute haowu_mall --local --file=schema.sql
 -- Run in prod:  npx wrangler d1 execute haowu_mall --remote --file=schema.sql
 
+DROP TABLE IF EXISTS admin_actions;
 DROP TABLE IF EXISTS order_events;
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
@@ -82,6 +83,15 @@ CREATE TABLE order_events (
   order_id INTEGER NOT NULL REFERENCES orders(id),
   status TEXT NOT NULL,
   note TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 後台操作紀錄：目前後台只有單一管理員密碼、沒有多使用者身分，
+-- 所以這裡記的是「發生了什麼操作」而非「誰做的」，作為操作留痕的展示。
+CREATE TABLE admin_actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  action TEXT NOT NULL,
+  detail TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
