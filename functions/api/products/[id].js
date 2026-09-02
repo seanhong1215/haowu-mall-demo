@@ -1,5 +1,6 @@
 import { json, errorJson } from "../../lib/json.js";
 import { requireAdmin } from "../../lib/auth.js";
+import { logAdminAction } from "../../lib/auditLog.js";
 
 // GET /api/products/:id  — accepts numeric id or slug
 export async function onRequestGet({ params, env }) {
@@ -66,8 +67,15 @@ export async function onRequestPatch({ request, params, env }) {
   }
   if (fields.length === 0) return errorJson("沒有需要更新的欄位", 400);
 
+  const existing = await env.DB.prepare(`SELECT title FROM products WHERE id = ?`).bind(id).first();
+  if (!existing) return errorJson("找不到此商品", 404);
+
   binds.push(id);
   await env.DB.prepare(`UPDATE products SET ${fields.join(", ")} WHERE id = ?`).bind(...binds).run();
+
+  if (Number.isFinite(body.price_cents)) {
+    await logAdminAction(env, "price_updated", `「${existing.title}」價格改為 NT$${(body.price_cents / 100).toFixed(0)}`);
+  }
 
   const updated = await env.DB.prepare(`SELECT * FROM products WHERE id = ?`).bind(id).first();
   return json({ product: updated });
