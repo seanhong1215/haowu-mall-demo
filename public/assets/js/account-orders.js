@@ -15,10 +15,10 @@ async function loadMyOrders() {
           .map(
             (o) => `
           <tr class="order-row" data-id="${o.id}" style="cursor:pointer;">
-            <td>${o.order_number}</td>
-            <td>${formatDateTime(o.created_at)}</td>
-            <td>${formatPrice(o.total_cents)}</td>
-            <td><span class="status-pill status-pill--${o.status}">${STATUS_LABEL[o.status] || o.status}</span></td>
+            <td data-label="訂單編號">${o.order_number}</td>
+            <td data-label="下單時間">${formatDateTime(o.created_at)}</td>
+            <td data-label="總計">${formatPrice(o.total_cents)}</td>
+            <td data-label="狀態"><span class="status-pill status-pill--${o.status}">${STATUS_LABEL[o.status] || o.status}</span></td>
           </tr>`
           )
           .join("")}
