@@ -36,7 +36,10 @@
   <section class="flash-sale">
     <div class="container">
       <div class="flash-sale__header">
-        <div class="flash-sale__title"><span class="icon-emoji">⚡</span>限時搶購</div>
+        <div class="flash-sale__title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#ff6600" aria-hidden="true"><path d="M13.5 2 4 13.2h5.4L9 22l9.6-11.3H13z"/></svg>
+          限時搶購
+        </div>
         <div class="countdown">今日結束倒數 <span id="countdown"></span></div>
       </div>
       <div class="product-grid product-row" id="flash-sale-grid">
@@ -47,14 +50,17 @@
 
   <div class="container">
     <div class="coupon-banner">
-      <span>🎁 新會員註冊即享 <strong>NT$100</strong> 購物金</span>
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ff6600" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="3" y="8.5" width="18" height="12.5" rx="1.5"/><path d="M3 12.8h18M12 8.5V21"/><path d="M12 8.5S9.6 3.9 7.1 5.4s.6 3.1 4.9 3.1zM12 8.5s2.4-4.6 4.9-3.1-.6 3.1-4.9 3.1z"/></svg>
+        新會員註冊即享 <strong>NT$100</strong> 購物金
+      </span>
       <a href="/account/register.html" class="btn btn--small">立即註冊</a>
     </div>
   </div>
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>🔥 熱銷排行榜 TOP 5</h2>
+      <h2><svg class="section-icon" viewBox="86 65 228 228" fill="none" stroke="#c33a50" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M200 78c40 54 76 76 76 126a76 76 0 0 1-152 0c0-31 20-53 33-72 6 15 16 23 25 27-5-33 8-60 18-81z"/></svg>熱銷排行榜 TOP 5</h2>
       <a href="/collection.html?sort=newest" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="rank-grid"></div>
@@ -62,7 +68,7 @@
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>💻 3C家電精選</h2>
+      <h2><svg class="section-icon" viewBox="77 34 246 246" fill="none" stroke="#44607e" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="115" y="90" width="170" height="112" rx="10"/><line x1="164" y1="128" x2="236" y2="128"/><rect x="90" y="208" width="220" height="16" rx="8"/></svg>3C家電精選</h2>
       <a href="/collection.html?collection=3C家電" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="cat-grid-3C家電"></div>
@@ -70,7 +76,7 @@
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>💄 美妝保養推薦</h2>
+      <h2><svg class="section-icon" viewBox="107 73 186 186" fill="none" stroke="#bb7793" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="178" y="86" width="44" height="38" rx="6"/><rect x="152" y="124" width="96" height="122" rx="14"/><line x1="152" y1="168" x2="248" y2="168"/></svg>美妝保養推薦</h2>
       <a href="/collection.html?collection=美妝保養" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="cat-grid-美妝保養"></div>
@@ -78,7 +84,7 @@
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>👕 時尚服飾嚴選</h2>
+      <h2><svg class="section-icon" viewBox="103 65 194 194" fill="none" stroke="#8069ab" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><polygon points="168,92 188,92 200,78 212,92 232,92 258,120 234,144 234,246 166,246 166,144 142,120"/></svg>時尚服飾嚴選</h2>
       <a href="/collection.html?collection=時尚服飾" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="cat-grid-時尚服飾"></div>
@@ -86,7 +92,7 @@
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>🏠 生活居家好物</h2>
+      <h2><svg class="section-icon" viewBox="111 69 178 178" fill="none" stroke="#ad8253" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><polygon points="200,82 262,138 138,138"/><rect x="150" y="138" width="100" height="96"/><rect x="184" y="172" width="32" height="62"/></svg>生活居家好物</h2>
       <a href="/collection.html?collection=生活居家" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="cat-grid-生活居家"></div>
@@ -94,7 +100,7 @@
 
   <section class="section container">
     <div class="section-title-bar">
-      <h2>🛒 食品雜貨嚴選</h2>
+      <h2><svg class="section-icon" viewBox="117 79 166 166" fill="none" stroke="#67955f" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M170 150 Q200 92 230 150"/><polygon points="152,150 248,150 233,232 167,232"/></svg>食品雜貨嚴選</h2>
       <a href="/collection.html?collection=食品雜貨" class="see-all">查看更多 →</a>
     </div>
     <div class="product-grid product-row" id="cat-grid-食品雜貨"></div>

@@ -4,9 +4,13 @@
    settings-schema-driven. */
 
 :root {
-  --color-bg: #f5f5f5;
+  --color-bg: #f6f5f4;
   --color-bg-alt: #ffffff;
   --color-surface: #ffffff;
+  /* 商品圖統一相框底色：商品照片的背景各不相同（木頭、沙灘、白、黑），
+     滿版並排時整排會很雜；退到同一個淺灰相框裡就有了共同邊界。 */
+  --color-media-frame: #fafafa;
+  --color-band: #1c1c1c;
   --color-text: #222222;
   --color-text-muted: #888888;
   --color-accent: #c33a50;
@@ -238,21 +242,28 @@ button { font-family: inherit; }
 
 /* ---------- section title bar (red accent) ---------- */
 .section-title-bar {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
   margin-bottom: 18px; padding-left: 12px; border-left: 5px solid var(--color-accent);
 }
-.section-title-bar h2 { margin: 0; font-size: 1.25rem; }
+/* 標題後面接一條細線延伸到「查看更多」，讓每個區塊的起點更明確 */
+.section-title-bar h2 {
+  margin: 0; font-size: 1.25rem;
+  display: flex; align-items: center; gap: 10px; flex-grow: 1;
+}
+.section-title-bar h2::after {
+  content: ""; flex-grow: 1; height: 1px; background: var(--color-border);
+}
+.section-title-bar .section-icon { width: 22px; height: 22px; flex-shrink: 0; }
 .section-title-bar .see-all { font-size: 0.85rem; color: var(--color-accent); text-decoration: none; white-space: nowrap; }
 
 /* ---------- flash sale ---------- */
-.flash-sale { background: linear-gradient(135deg, #1c1c1c, #050505); padding: 28px 0; margin: 32px 0; }
+.flash-sale { background: linear-gradient(135deg, var(--color-band), #050505); padding: 28px 0; margin: 32px 0; }
 .flash-sale__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; color: #fff; }
 .flash-sale__title { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 900; }
-.flash-sale__title .icon-emoji { font-size: 1.4rem; }
 .countdown { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
 .countdown__box { background: rgba(0,0,0,0.35); border-radius: 4px; padding: 4px 8px; font-variant-numeric: tabular-nums; font-weight: 700; }
 .flash-sale .product-grid { background: transparent; }
-.flash-sale .product-card { background: #fff; border-radius: var(--radius); padding: 10px; }
+.flash-sale .product-card { background: #fff; border-radius: var(--radius); }
 
 /* ---------- coupon banner ---------- */
 .coupon-banner {
@@ -377,10 +388,10 @@ button { font-family: inherit; }
 .product-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.12); transform: translateY(-2px); }
 .product-card__media {
   position: relative; aspect-ratio: 1/1; overflow: hidden;
-  background: var(--color-bg-alt);
+  background: var(--color-media-frame); padding: 10px;
 }
-.product-card__media img { width: 100%; height: 100%; object-fit: cover; }
-.product-card__badges { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 4px; }
+.product-card__media img { width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
+.product-card__badges { position: absolute; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 4px; }
 .product-card__badge {
   background: var(--color-accent); color: #fff;
   font-size: 0.68rem; font-weight: 700;
@@ -388,21 +399,24 @@ button { font-family: inherit; }
 }
 .product-card__badge--sold-out { background: #888; }
 .product-card__badge--rank { background: #ffb400; color: #3a2a00; }
-.product-card__body { padding: 14px 14px 16px; }
+/* 資訊分層：價格獨立成一行並加重，免運與銷量降為同一行的次要資訊，
+   取代原本價格／免運／銷量各佔一行、彼此權重接近的排法。 */
+.product-card__body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 7px; }
 .product-card__title {
-  font-size: 0.85rem; margin-bottom: 8px; line-height: 1.45;
+  font-size: 0.85rem; line-height: 1.45;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   min-height: 2.5em;
 }
-.product-card__rating { margin: 4px 0 8px; }
 .price { font-size: 1.05rem; font-weight: 700; color: var(--color-accent); }
+.product-card .price { font-size: 1.15rem; font-weight: 900; }
 .price--compare { color: var(--color-text-muted); text-decoration: line-through; font-weight: 400; font-size: 0.8rem; margin-right: 6px; }
 .price--sale { color: var(--color-accent); }
+.product-card__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .free-shipping-tag {
-  display: inline-block; margin-top: 8px; font-size: 0.7rem; color: var(--color-success);
+  display: inline-block; font-size: 0.7rem; color: var(--color-success);
   border: 1px solid var(--color-success); border-radius: 3px; padding: 2px 6px;
 }
-.sold-count { font-size: 0.72rem; color: var(--color-text-muted); margin-top: 6px; }
+.sold-count { font-size: 0.72rem; color: var(--color-text-muted); }
 
 /* ---------- collection toolbar ---------- */
 .collection-header { padding: 30px 0 18px; text-align: center; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
