@@ -69,6 +69,40 @@ function renderOrdersTable(orders) {
   });
 }
 
+function renderStatsCards(orders) {
+  const pending = orders.filter((o) => o.status === "pending").length;
+  const now = new Date();
+  const monthRevenue = orders
+    .filter((o) => {
+      if (o.status === "cancelled") return false;
+      const d = new Date(o.created_at.replace(" ", "T"));
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    })
+    .reduce((sum, o) => sum + o.total_cents, 0);
+  const cancelled = orders.filter((o) => o.status === "cancelled").length;
+
+  const cards = [
+    { label: "待處理訂單", value: pending, hint: "已下單、待付款/出貨" },
+    { label: "本月營收", value: formatPrice(monthRevenue), hint: "不含已取消訂單" },
+    { label: "訂單總數", value: orders.length, hint: "目前資料庫全部訂單" },
+    { label: "已取消訂單", value: cancelled, hint: "" },
+  ];
+  return `
+    <div class="admin-stats">
+      ${cards
+        .map(
+          (c) => `
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__value">${c.value}</div>
+          <div class="admin-stat-card__label">${c.label}</div>
+          ${c.hint ? `<div class="admin-stat-card__hint">${c.hint}</div>` : ""}
+        </div>`
+        )
+        .join("")}
+    </div>
+  `;
+}
+
 function filterOrders(keyword) {
   const q = keyword.trim().toLowerCase();
   if (!q) return currentOrders;
@@ -92,6 +126,7 @@ async function loadOrders() {
   }
 
   panel.innerHTML = `
+    ${renderStatsCards(currentOrders)}
     <div class="admin-toolbar">
       <input type="search" id="order-search" placeholder="搜尋訂單編號、客戶姓名或 Email" aria-label="搜尋訂單">
     </div>
@@ -136,7 +171,16 @@ async function loadInventory() {
   panel.innerHTML = `<p class="text-muted">商品載入中…</p>`;
   const { products } = await Api.get("/api/products?sort=title");
 
+  const LOW_STOCK_THRESHOLD = 5;
+  const lowStock = products.flatMap((p) => (p.variants.length ? p.variants : []).filter((v) => v.inventory <= LOW_STOCK_THRESHOLD));
+  const outOfStock = lowStock.filter((v) => v.inventory === 0).length;
+
   panel.innerHTML = `
+    ${
+      lowStock.length
+        ? `<div class="banner banner--error" style="margin-bottom:16px;">⚠️ ${lowStock.length} 項規格庫存量偏低（≤${LOW_STOCK_THRESHOLD} 件）${outOfStock ? `，其中 ${outOfStock} 項已售罄` : ""}，建議儘快補貨。</div>`
+        : ""
+    }
     <div style="overflow-x:auto;">
     <table class="admin-table">
       <thead><tr><th>商品</th><th>價格（NT$）</th><th>規格</th><th>庫存</th></tr></thead>

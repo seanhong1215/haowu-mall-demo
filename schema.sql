@@ -201,3 +201,39 @@ INSERT INTO reviews (product_id, author_name, rating, comment, created_at) VALUE
 -- 一組 demo 會員帳號，方便直接體驗登入流程。密碼：demo1234
 INSERT INTO customers (name, email, password_hash, password_salt) VALUES
 ('示範會員', 'demo@example.com', '8e00d362e5ee45a75d57a19e3abd21d54c00c4c6339e0c0f5cd034d20f607722', 'a59e92cab0785ae8a0fc54c0cd5d3aea');
+
+-- 訂單種子資料：demo 會員帳號涵蓋四種狀態（已下單／已付款／已出貨／已取消），
+-- 讓「我的訂單」與後台「訂單管理」一開始就有真實資料可看，而不是空畫面。
+-- 另外補兩筆訪客訂單，讓後台清單更貼近多客戶下單的真實情境。
+INSERT INTO orders (order_number, customer_id, customer_name, customer_email, shipping_address, status, subtotal_cents, shipping_cents, tax_cents, total_cents, payment_card_brand, payment_card_last4, tracking_number, created_at) VALUES
+('HW9K2F7QXA', 1, '示範會員', 'demo@example.com', '台北市信義區松仁路100號8樓', 'fulfilled', 197000, 0, 0, 197000, 'Visa', '4242', 'HCT8X2QZK1A9', '2026-08-21 10:12:00'),
+('HW9K5R3PLM', 1, '示範會員', 'demo@example.com', '台北市信義區松仁路100號8樓', 'paid', 178000, 0, 0, 178000, 'Visa', '4242', NULL, '2026-08-28 15:40:00'),
+('HW9KAX1WZ2', 1, '示範會員', 'demo@example.com', '台北市信義區松仁路100號8樓', 'pending', 49000, 8000, 0, 57000, 'JCB', '9981', NULL, '2026-09-01 09:05:00'),
+('HW9J8Q4NRT', 1, '示範會員', 'demo@example.com', '台北市信義區松仁路100號8樓', 'cancelled', 52000, 8000, 0, 60000, 'Visa', '4242', NULL, '2026-08-13 18:22:00'),
+('HW9K7M2VDQ', NULL, '王小明', 'wang.demo@example.com', '新北市板橋區文化路二段18號', 'fulfilled', 183000, 0, 0, 183000, 'MasterCard', '5588', 'HCT4M8P2VXQ7', '2026-08-27 11:00:00'),
+('HW9KC1YB6X', NULL, '陳雅婷', 'chen.demo@example.com', '台中市西屯區台灣大道三段99號', 'paid', 98000, 8000, 0, 106000, 'Visa', '1024', NULL, '2026-08-31 20:10:00');
+
+INSERT INTO order_items (order_id, product_id, variant_id, title, variant_label, price_cents, quantity) VALUES
+(1, 11, 20, '真無線藍牙耳機', '白色', 129000, 1),
+(1, 1, 1, '手拉坏陶瓷花瓶', '沙色', 68000, 1),
+(2, 15, 26, '玻尿酸保濕精華液', '30ml', 89000, 2),
+(3, 19, 32, '純棉圓領短袖上衣', 'M', 49000, 1),
+(4, 3, 6, '手工編織收納籃', '小', 52000, 1),
+(5, 24, 44, '精選綜合堅果禮盒', '400g', 69000, 2),
+(5, 25, 45, '義大利原裝進口橄欖油', '500ml', 45000, 1),
+(6, 21, 40, '針織開襟外套', '深藍', 98000, 1);
+
+INSERT INTO order_events (order_id, status, note, created_at) VALUES
+(1, 'pending', NULL, '2026-08-21 10:12:00'),
+(1, 'paid', '已確認付款', '2026-08-21 11:05:00'),
+(1, 'fulfilled', '商品已出貨，物流追蹤碼 HCT8X2QZK1A9', '2026-08-22 09:30:00'),
+(2, 'pending', NULL, '2026-08-28 15:40:00'),
+(2, 'paid', '已確認付款', '2026-08-28 16:02:00'),
+(3, 'pending', NULL, '2026-09-01 09:05:00'),
+(4, 'pending', NULL, '2026-08-13 18:22:00'),
+(4, 'cancelled', '訂單已取消', '2026-08-13 20:47:00'),
+(5, 'pending', NULL, '2026-08-27 11:00:00'),
+(5, 'paid', '已確認付款', '2026-08-27 11:28:00'),
+(5, 'fulfilled', '商品已出貨，物流追蹤碼 HCT4M8P2VXQ7', '2026-08-28 10:15:00'),
+(6, 'pending', NULL, '2026-08-31 20:10:00'),
+(6, 'paid', '已確認付款', '2026-08-31 20:33:00');
