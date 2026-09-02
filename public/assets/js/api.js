@@ -48,15 +48,48 @@ function formatPrice(cents) {
   return `NT$${priceFormatter.format(cents / 100)}`;
 }
 
-// ---------- product "photos" ----------
-// This demo has no real product photography, and random stock-photo
-// placeholders (the previous approach) look actively wrong — a t-shirt
-// showing a photo of palm trees erodes trust fast. Instead, every product
-// gets a generated on-brand tile: a category-tinted gradient plus a simple
-// line icon, picked deterministically from its image_seed (seeds are
-// prefixed by category, e.g. "gadget-earbuds", "beauty-serum"). No network
-// request, no mismatch, and it reads clearly as "placeholder" rather than
-// as a wrong photo.
+// ---------- product photos ----------
+// This demo has no real product photography of its own, and random
+// stock-photo placeholders (the original approach) looked actively wrong —
+// a t-shirt showing a photo of palm trees erodes trust fast. Every seed
+// below is hand-picked to actually match its product (curated from Pexels'
+// free-to-use library, verified by image_seed) and hotlinked straight from
+// Pexels' CDN. Anything without a curated match — future/unseeded products —
+// falls back to the generated category-tinted line-icon tile so the layout
+// never breaks.
+const PEXELS_PHOTO_ID = {
+  "arden-vase": 33126633,
+  "arden-linen": 12594849,
+  "arden-basket": 9695849,
+  "arden-stoneware": 33661399,
+  "arden-candle": 20179858,
+  "arden-rug": 6634453,
+  "arden-board": 33937886,
+  "arden-mugs": 6312194,
+  "arden-runner": 34232560,
+  "arden-lamp": 3554241,
+  "gadget-earbuds": 8380433,
+  "gadget-powerbank": 14706040,
+  "gadget-smartband": 13007642,
+  "gadget-fan": 14542079,
+  "beauty-serum": 8101534,
+  "beauty-cleanser": 11179690,
+  "beauty-sunscreen": 16378491,
+  "beauty-shampoo": 8054407,
+  "fashion-tee": 18186106,
+  "fashion-jeans": 4109798,
+  "fashion-cardigan": 9603624,
+  "fashion-totebag": 1214212,
+  "grocery-tea": 6087517,
+  "grocery-nuts": 86649,
+  "grocery-oliveoil": 7296399,
+  "grocery-chicken": 30635713,
+};
+
+function pexelsUrl(id, w, h) {
+  return `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}${h ? `&h=${h}&fit=crop` : ""}`;
+}
+
 const CATEGORY_VISUALS = {
   gadget: {
     colors: ["#7091b3", "#44607e"],
@@ -91,6 +124,9 @@ function visualForSeed(seed) {
 const _placeholderCache = new Map();
 
 function imageUrl(seed, index = 1, w = 900, h = 1125) {
+  const photoId = PEXELS_PHOTO_ID[seed];
+  if (photoId) return pexelsUrl(photoId, w, h);
+
   const cacheKey = `${seed}-${index}-${w}x${h}`;
   if (_placeholderCache.has(cacheKey)) return _placeholderCache.get(cacheKey);
 
@@ -119,46 +155,16 @@ function imageUrl(seed, index = 1, w = 900, h = 1125) {
 }
 
 // Marketing banners (homepage hero, "about us" split section) had the same
-// problem as product photos — random unrelated stock images — just at a
-// much more visible size. This generates an abstract, on-brand "collage" of
-// soft overlapping circles in the five category colors: no literal photo
-// needed, and it doubles as a visual metaphor for "many kinds of products
-// under one roof". Cached the same way as product placeholders.
-const _bannerCache = new Map();
-function brandCollageDataUri(w, h, seed = "banner") {
-  const cacheKey = `${seed}-${w}x${h}`;
-  if (_bannerCache.has(cacheKey)) return _bannerCache.get(cacheKey);
+// problem as product photos — just at a much more visible size, so it
+// mattered even more to get real, contextually-fitting photos rather than
+// generated graphics. Both are curated Pexels shopping/retail photos that
+// happen to read well in the site's red/black palette.
+const HERO_PHOTO_ID = 7987587; // red shopping bags on black — matches accent color
+const ABOUT_PHOTO_ID = 7987872; // colorful shopping bags, top-down — fills a square crop better than the side-angle shots
 
-  const colors = Object.values(CATEGORY_VISUALS).map((v) => v.colors[0]);
-  const rand = mulberry32(hashCode(seed));
-  const circles = colors
-    .map((c) => {
-      const cx = Math.round(rand() * w);
-      const cy = Math.round(rand() * h);
-      const r = Math.round(Math.min(w, h) * (0.28 + rand() * 0.2));
-      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" opacity="0.85"/>`;
-    })
-    .join("");
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    <rect width="${w}" height="${h}" fill="#f3ede3"/>
-    <g style="mix-blend-mode:multiply;">${circles}</g>
-  </svg>`;
-
-  const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-  _bannerCache.set(cacheKey, uri);
-  return uri;
-}
-
-function mulberry32(seed) {
-  let a = seed >>> 0;
-  return function () {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+function brandPhotoUrl(which, w, h) {
+  const id = which === "about" ? ABOUT_PHOTO_ID : HERO_PHOTO_ID;
+  return pexelsUrl(id, w, h);
 }
 
 // Generic "nothing here" icon for empty states (empty cart, no search
