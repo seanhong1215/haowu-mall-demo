@@ -2,7 +2,7 @@
   "name": "haowu-mall",
   "private": true,
   "version": "1.0.0",
-  "description": "好物商城 — full-stack e-commerce demo (Cloudflare Pages + Pages Functions + D1)",
+  "description": "好物商城 — full-stack e-commerce demo",
   "scripts": {
     "db:init": "wrangler d1 execute haowu_mall --local --file=schema.sql",
     "db:init:remote": "wrangler d1 execute haowu_mall --remote --file=schema.sql",

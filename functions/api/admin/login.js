@@ -7,7 +7,7 @@ export async function onRequestPost({ request, env }) {
   const expected = env.ADMIN_PASSWORD || "demo1234";
 
   if (!body || body.password !== expected) {
-    return errorJson("Incorrect password", 401);
+    return errorJson("密碼錯誤", 401);
   }
 
   const token = await createSessionToken(env, "admin", 0);

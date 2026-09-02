@@ -6,18 +6,18 @@ function centsToDollarsInput(cents) {
 
 async function loadOrders() {
   const panel = document.getElementById("panel-orders");
-  panel.innerHTML = `<p class="text-muted">Loading orders…</p>`;
+  panel.innerHTML = `<p class="text-muted">訂單載入中…</p>`;
   const { orders } = await Api.get("/api/orders");
 
   if (orders.length === 0) {
-    panel.innerHTML = `<p class="empty-state">No orders yet — place one from the storefront checkout to see it here.</p>`;
+    panel.innerHTML = `<p class="empty-state">目前尚無訂單——請先從前台結帳建立一筆訂單。</p>`;
     return;
   }
 
   panel.innerHTML = `
     <table class="admin-table">
       <thead>
-        <tr><th>Order</th><th>Customer</th><th>Placed</th><th>Total</th><th>Status</th></tr>
+        <tr><th>訂單編號</th><th>客戶</th><th>下單時間</th><th>總計</th><th>狀態</th></tr>
       </thead>
       <tbody>
         ${orders
@@ -30,7 +30,7 @@ async function loadOrders() {
             <td>${formatPrice(o.total_cents)}</td>
             <td>
               <select data-id="${o.id}" class="status-select">
-                ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}
+                ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
               </select>
             </td>
           </tr>`
@@ -60,16 +60,16 @@ async function loadOrders() {
 
 async function showOrderDetail(id) {
   const detail = document.getElementById("order-detail");
-  detail.innerHTML = `<p class="text-muted">Loading…</p>`;
+  detail.innerHTML = `<p class="text-muted">載入中…</p>`;
   const { order } = await Api.get(`/api/orders/${id}`);
   detail.innerHTML = `
     <div class="admin-order-detail">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
         <div>
-          <h3 style="margin-bottom:2px;">Order ${order.order_number}</h3>
+          <h3 style="margin-bottom:2px;">訂單 ${order.order_number}</h3>
           <p class="text-muted" style="margin:0;">${order.customer_name} · ${order.customer_email}</p>
           <p class="text-muted" style="margin:0;">${order.shipping_address}</p>
-          ${order.payment_card_brand ? `<p class="text-muted" style="margin:4px 0 0;">Paid with ${order.payment_card_brand} ending in ${order.payment_card_last4}</p>` : ""}
+          ${order.payment_card_brand ? `<p class="text-muted" style="margin:4px 0 0;">付款方式：${order.payment_card_brand} 末四碼 ${order.payment_card_last4}</p>` : ""}
         </div>
         <div style="min-width:220px;">${orderTimelineHTML(order)}</div>
       </div>
@@ -85,12 +85,12 @@ async function showOrderDetail(id) {
 
 async function loadInventory() {
   const panel = document.getElementById("panel-inventory");
-  panel.innerHTML = `<p class="text-muted">Loading products…</p>`;
+  panel.innerHTML = `<p class="text-muted">商品載入中…</p>`;
   const { products } = await Api.get("/api/products?sort=title");
 
   panel.innerHTML = `
     <table class="admin-table">
-      <thead><tr><th>Product</th><th>Price (NT$)</th><th>Variant</th><th>Stock</th></tr></thead>
+      <thead><tr><th>商品</th><th>價格（NT$）</th><th>規格</th><th>庫存</th></tr></thead>
       <tbody>
         ${products
           .map((p) =>
@@ -104,7 +104,7 @@ async function loadInventory() {
               <td>${
                 v
                   ? `<input class="inline-input stock-input" data-variant="${v.id}" type="number" min="0" value="${v.inventory}">`
-                  : `<span class="text-muted">n/a</span>`
+                  : `<span class="text-muted">無</span>`
               }</td>
             </tr>`
               )

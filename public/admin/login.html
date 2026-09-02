@@ -1,26 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Store Admin — 好物商城</title>
+<title>賣家後台登入 — 好物商城</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body class="admin-shell">
 <div class="admin-login">
-  <h1 style="font-size:1.4rem;">Store admin</h1>
-  <p class="text-muted">Demo credentials: password is <code>demo1234</code> unless the ADMIN_PASSWORD environment variable was changed.</p>
+  <h1 style="font-size:1.4rem;">賣家後台</h1>
+  <p class="text-muted">Demo 密碼為 <code>demo1234</code>（除非已透過環境變數 ADMIN_PASSWORD 另行設定）。</p>
   <div class="banner banner--error" id="login-banner" hidden></div>
   <form id="login-form" class="form-grid">
     <div class="form-row">
-      <label for="password">Password</label>
+      <label for="password">密碼</label>
       <input id="password" name="password" type="password" required autofocus>
     </div>
-    <button type="submit" class="btn btn--accent btn--block">Log in</button>
+    <button type="submit" class="btn btn--accent btn--block">登入</button>
   </form>
-  <p style="margin-top:20px;"><a href="/index.html" class="text-muted">← Back to store</a></p>
+  <p style="margin-top:20px;"><a href="/index.html" class="text-muted">← 回到前台</a></p>
 </div>
 
 <script src="/assets/js/api.js"></script>

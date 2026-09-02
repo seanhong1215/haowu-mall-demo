@@ -46,13 +46,13 @@ export async function onRequestGet({ params, env }) {
 
 // PATCH /api/products/:id  — admin only. Body: { price_cents?, compare_at_price_cents? }
 export async function onRequestPatch({ request, params, env }) {
-  if (!(await requireAdmin(request, env))) return errorJson("Unauthorized", 401);
+  if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
 
   const id = Number(params.id);
-  if (!Number.isFinite(id)) return errorJson("Invalid product id", 400);
+  if (!Number.isFinite(id)) return errorJson("商品編號無效", 400);
 
   const body = await request.json().catch(() => null);
-  if (!body) return errorJson("Invalid JSON body", 400);
+  if (!body) return errorJson("請求格式錯誤", 400);
 
   const fields = [];
   const binds = [];
@@ -64,7 +64,7 @@ export async function onRequestPatch({ request, params, env }) {
     fields.push("compare_at_price_cents = ?");
     binds.push(body.compare_at_price_cents);
   }
-  if (fields.length === 0) return errorJson("Nothing to update", 400);
+  if (fields.length === 0) return errorJson("沒有需要更新的欄位", 400);
 
   binds.push(id);
   await env.DB.prepare(`UPDATE products SET ${fields.join(", ")} WHERE id = ?`).bind(...binds).run();

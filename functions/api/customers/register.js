@@ -5,7 +5,7 @@ import { hashPassword } from "../../lib/password.js";
 // POST /api/customers/register  Body: { name, email, password }
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
-  if (!body) return errorJson("Invalid JSON body", 400);
+  if (!body) return errorJson("請求格式錯誤", 400);
 
   const name = (body.name || "").trim();
   const email = (body.email || "").trim().toLowerCase();

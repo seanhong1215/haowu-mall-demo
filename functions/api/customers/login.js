@@ -5,7 +5,7 @@ import { verifyPassword } from "../../lib/password.js";
 // POST /api/customers/login  Body: { email, password }
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
-  if (!body) return errorJson("Invalid JSON body", 400);
+  if (!body) return errorJson("請求格式錯誤", 400);
 
   const email = (body.email || "").trim().toLowerCase();
   const password = body.password || "";

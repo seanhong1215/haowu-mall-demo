@@ -2,6 +2,7 @@ import { json, errorJson } from "../../lib/json.js";
 import { requireAdmin, currentCustomerId } from "../../lib/auth.js";
 
 const VALID_STATUSES = ["pending", "paid", "fulfilled", "cancelled"];
+const STATUS_LABEL_ZH = { pending: "已下單", paid: "已付款", fulfilled: "已出貨", cancelled: "已取消" };
 const STATUS_NOTES = {
   paid: "已確認付款",
   fulfilled: "商品已出貨",
@@ -33,7 +34,7 @@ export async function onRequestGet({ params, env, request }) {
     const isAdmin = await requireAdmin(request, env);
     const customerId = await currentCustomerId(request, env);
     const isOwner = customerId && order.customer_id === customerId;
-    if (!isAdmin && !isOwner) return errorJson("Unauthorized", 401);
+    if (!isAdmin && !isOwner) return errorJson("未授權，請重新登入", 401);
   }
 
   const { results: items } = await env.DB.prepare(`SELECT * FROM order_items WHERE order_id = ?`)
@@ -52,16 +53,16 @@ export async function onRequestGet({ params, env, request }) {
 // Records the transition in order_events, and auto-assigns a tracking number
 // the first time an order moves to "fulfilled".
 export async function onRequestPatch({ request, params, env }) {
-  if (!(await requireAdmin(request, env))) return errorJson("Unauthorized", 401);
+  if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
 
   const id = Number(params.id);
   const body = await request.json().catch(() => null);
   if (!body || !VALID_STATUSES.includes(body.status)) {
-    return errorJson(`status must be one of: ${VALID_STATUSES.join(", ")}`, 400);
+    return errorJson(`狀態必須是以下其中一種：${VALID_STATUSES.map((s) => STATUS_LABEL_ZH[s]).join("、")}`, 400);
   }
 
   const existing = await env.DB.prepare(`SELECT * FROM orders WHERE id = ?`).bind(id).first();
-  if (!existing) return errorJson("Order not found", 404);
+  if (!existing) return errorJson("找不到此訂單", 404);
 
   const needsTracking = body.status === "fulfilled" && !existing.tracking_number;
   const trackingNumber = needsTracking ? generateTrackingNumber() : existing.tracking_number;

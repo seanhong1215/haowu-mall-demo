@@ -11,7 +11,7 @@ const TAX_RATE = 0;
 
 // GET /api/orders — admin only, list of orders (newest first)
 export async function onRequestGet({ request, env }) {
-  if (!(await requireAdmin(request, env))) return errorJson("Unauthorized", 401);
+  if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
 
   const { results: orders } = await env.DB.prepare(
     `SELECT * FROM orders ORDER BY created_at DESC`
@@ -26,7 +26,7 @@ export async function onRequestGet({ request, env }) {
 // If a customer is logged in (customer_session cookie), the order is linked to their account.
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
-  if (!body) return errorJson("Invalid JSON body", 400);
+  if (!body) return errorJson("請求格式錯誤", 400);
 
   const { customerName, customerEmail, shippingAddress, items, paymentCardBrand, paymentCardLast4 } = body;
   if (!customerName || !customerEmail || !shippingAddress) {

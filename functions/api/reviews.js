@@ -3,7 +3,7 @@ import { json, errorJson } from "../lib/json.js";
 // GET /api/reviews?productId=1
 export async function onRequestGet({ request, env }) {
   const productId = Number(new URL(request.url).searchParams.get("productId"));
-  if (!Number.isFinite(productId)) return errorJson("productId is required", 400);
+  if (!Number.isFinite(productId)) return errorJson("缺少商品編號", 400);
 
   const { results: reviews } = await env.DB.prepare(
     `SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC`
@@ -17,7 +17,7 @@ export async function onRequestGet({ request, env }) {
 // POST /api/reviews  Body: { productId, authorName, rating, comment }
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
-  if (!body) return errorJson("Invalid JSON body", 400);
+  if (!body) return errorJson("請求格式錯誤", 400);
 
   const productId = Number(body.productId);
   const rating = Number(body.rating);
