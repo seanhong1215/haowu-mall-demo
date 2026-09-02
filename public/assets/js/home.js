@@ -58,6 +58,11 @@ function startCountdown() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const heroSection = document.getElementById("hero-section");
+  if (heroSection) heroSection.style.backgroundImage = `url('${brandCollageDataUri(1800, 700, "hero")}')`;
+  const aboutImage = document.getElementById("about-image");
+  if (aboutImage) aboutImage.src = brandCollageDataUri(900, 900, "about");
+
   const iconsEl = document.getElementById("category-icons");
   if (iconsEl) {
     iconsEl.innerHTML = CATEGORY_ICONS.map(

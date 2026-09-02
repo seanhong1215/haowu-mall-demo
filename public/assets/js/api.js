@@ -118,6 +118,49 @@ function imageUrl(seed, index = 1, w = 900, h = 1125) {
   return uri;
 }
 
+// Marketing banners (homepage hero, "about us" split section) had the same
+// problem as product photos — random unrelated stock images — just at a
+// much more visible size. This generates an abstract, on-brand "collage" of
+// soft overlapping circles in the five category colors: no literal photo
+// needed, and it doubles as a visual metaphor for "many kinds of products
+// under one roof". Cached the same way as product placeholders.
+const _bannerCache = new Map();
+function brandCollageDataUri(w, h, seed = "banner") {
+  const cacheKey = `${seed}-${w}x${h}`;
+  if (_bannerCache.has(cacheKey)) return _bannerCache.get(cacheKey);
+
+  const colors = Object.values(CATEGORY_VISUALS).map((v) => v.colors[0]);
+  const rand = mulberry32(hashCode(seed));
+  const circles = colors
+    .map((c) => {
+      const cx = Math.round(rand() * w);
+      const cy = Math.round(rand() * h);
+      const r = Math.round(Math.min(w, h) * (0.28 + rand() * 0.2));
+      return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}" opacity="0.85"/>`;
+    })
+    .join("");
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <rect width="${w}" height="${h}" fill="#f3ede3"/>
+    <g style="mix-blend-mode:multiply;">${circles}</g>
+  </svg>`;
+
+  const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  _bannerCache.set(cacheKey, uri);
+  return uri;
+}
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Generic "nothing here" icon for empty states (empty cart, no search
 // results, no orders yet) — reused instead of leaving those screens as
 // bare text.
