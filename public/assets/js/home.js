@@ -1,10 +1,43 @@
+// Same line-icon shapes used for the generated product placeholders
+// (see api.js CATEGORY_VISUALS) so the category row and product tiles read
+// as one consistent icon system instead of mixed platform emoji.
 const CATEGORY_ICONS = [
-  { label: "全部商品", emoji: "🛍️", href: "/collection.html" },
-  { label: "3C家電", emoji: "💻", href: "/collection.html?collection=3C家電" },
-  { label: "美妝保養", emoji: "💄", href: "/collection.html?collection=美妝保養" },
-  { label: "時尚服飾", emoji: "👕", href: "/collection.html?collection=時尚服飾" },
-  { label: "生活居家", emoji: "🏠", href: "/collection.html?collection=生活居家" },
-  { label: "食品雜貨", emoji: "🛒", href: "/collection.html?collection=食品雜貨" },
+  {
+    label: "全部商品",
+    href: "/collection.html",
+    color: "var(--color-accent)",
+    icon: `<rect x="90" y="90" width="90" height="90" rx="12"/><rect x="220" y="90" width="90" height="90" rx="12"/><rect x="90" y="220" width="90" height="90" rx="12"/><rect x="220" y="220" width="90" height="90" rx="12"/>`,
+  },
+  {
+    label: "3C家電",
+    href: "/collection.html?collection=3C家電",
+    color: "#44607e",
+    icon: `<rect x="115" y="90" width="170" height="112" rx="10"/><line x1="164" y1="128" x2="236" y2="128"/><rect x="90" y="208" width="220" height="16" rx="8"/>`,
+  },
+  {
+    label: "美妝保養",
+    href: "/collection.html?collection=美妝保養",
+    color: "#bb7793",
+    icon: `<rect x="178" y="86" width="44" height="38" rx="6"/><rect x="152" y="124" width="96" height="122" rx="14"/><line x1="152" y1="168" x2="248" y2="168"/>`,
+  },
+  {
+    label: "時尚服飾",
+    href: "/collection.html?collection=時尚服飾",
+    color: "#8069ab",
+    icon: `<polygon points="168,92 188,92 200,78 212,92 232,92 258,120 234,144 234,246 166,246 166,144 142,120"/>`,
+  },
+  {
+    label: "生活居家",
+    href: "/collection.html?collection=生活居家",
+    color: "#ad8253",
+    icon: `<polygon points="200,82 262,138 138,138"/><rect x="150" y="138" width="100" height="96"/><rect x="184" y="172" width="32" height="62"/>`,
+  },
+  {
+    label: "食品雜貨",
+    href: "/collection.html?collection=食品雜貨",
+    color: "#67955f",
+    icon: `<path d="M170 150 Q200 92 230 150"/><polygon points="152,150 248,150 233,232 167,232"/>`,
+  },
 ];
 
 function startCountdown() {
@@ -25,10 +58,19 @@ function startCountdown() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const heroSection = document.getElementById("hero-section");
+  if (heroSection) heroSection.style.backgroundImage = "url('/assets/images/home-hero-premium.jpg')";
+  const aboutImage = document.getElementById("about-image");
+  if (aboutImage) aboutImage.src = "/assets/images/home-story-lifestyle.jpg";
+
   const iconsEl = document.getElementById("category-icons");
   if (iconsEl) {
     iconsEl.innerHTML = CATEGORY_ICONS.map(
-      (c) => `<a href="${c.href}"><span class="icon-emoji">${c.emoji}</span>${c.label}</a>`
+      (c) => `
+      <a href="${c.href}">
+        <svg class="category-icon" viewBox="0 0 400 400" style="color:${c.color};" fill="none" stroke="currentColor" stroke-width="20" stroke-linejoin="round" stroke-linecap="round">${c.icon}</svg>
+        ${c.label}
+      </a>`
     ).join("");
   }
 
@@ -36,6 +78,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const flashGrid = document.getElementById("flash-sale-grid");
   const rankGrid = document.getElementById("rank-grid");
+  document.querySelectorAll(".product-grid").forEach((grid) => {
+    grid.innerHTML = skeletonCardsHTML(5);
+  });
 
   try {
     const { products } = await Api.get("/api/products?sort=newest");
@@ -65,13 +110,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("submit", (e) => {
   if (e.target.id !== "newsletter-form") return;
   e.preventDefault();
-  const btn = e.target.querySelector("button");
+  const form = e.target;
+  const btn = form.querySelector("button");
+  const success = document.getElementById("newsletter-success");
   const original = btn.textContent;
   btn.textContent = "訂閱成功 ✓";
   btn.disabled = true;
+  if (success) success.hidden = false;
   setTimeout(() => {
     btn.textContent = original;
     btn.disabled = false;
-    e.target.reset();
-  }, 2500);
+    if (success) success.hidden = true;
+    form.reset();
+  }, 3500);
 });

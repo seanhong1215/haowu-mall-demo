@@ -37,9 +37,10 @@ function renderHeader() {
         <button type="submit">搜尋</button>
       </form>
       <div class="site-header__actions">
+        <button class="icon-btn mobile-search-toggle" id="mobile-search-toggle" aria-expanded="false" aria-controls="mobile-search-panel" aria-label="搜尋商品">⌕</button>
         <span id="account-slot" class="account-slot"></span>
         <button class="icon-btn" data-open-cart aria-label="開啟購物車">
-          🛒 購物車 <span class="cart-count" id="cart-count">0</span>
+          🛒 <span class="cart-label">購物車</span> <span class="cart-count" id="cart-count">0</span>
         </button>
       </div>
     </div>
@@ -48,22 +49,48 @@ function renderHeader() {
         ${NAV_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}
       </ul>
     </nav>
-    <nav id="mobile-nav" hidden aria-label="行動選單">
-      <ul class="site-header__nav" style="flex-direction:column;padding:12px 20px 16px;gap:14px;background:#fff;">
+    <div id="mobile-search-panel" class="mobile-panel" hidden>
+      <form class="mobile-search" id="mobile-search" role="search">
+        <input type="search" name="q" placeholder="搜尋商品、品牌、關鍵字" aria-label="搜尋商品">
+        <button type="submit" class="btn btn--small">搜尋</button>
+      </form>
+    </div>
+    <nav id="mobile-nav" class="mobile-panel" hidden aria-label="行動選單">
+      <ul class="mobile-nav__list">
         ${NAV_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}
+        <li><a href="/account/login.html">會員登入</a></li>
+        <li><a href="/account/orders.html">我的訂單</a></li>
       </ul>
     </nav>
   `;
 
   const toggle = document.getElementById("nav-toggle");
   const mobileNav = document.getElementById("mobile-nav");
+  const searchToggle = document.getElementById("mobile-search-toggle");
+  const mobileSearchPanel = document.getElementById("mobile-search-panel");
   toggle.addEventListener("click", () => {
     const isOpen = mobileNav.hidden === false;
     mobileNav.hidden = isOpen;
     toggle.setAttribute("aria-expanded", String(!isOpen));
+    mobileSearchPanel.hidden = true;
+    searchToggle.setAttribute("aria-expanded", "false");
+  });
+
+  searchToggle.addEventListener("click", () => {
+    const isOpen = mobileSearchPanel.hidden === false;
+    mobileSearchPanel.hidden = isOpen;
+    searchToggle.setAttribute("aria-expanded", String(!isOpen));
+    mobileNav.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    if (!isOpen) mobileSearchPanel.querySelector("input").focus();
   });
 
   document.getElementById("site-search").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = e.target.q.value.trim();
+    location.href = q ? `/collection.html?q=${encodeURIComponent(q)}` : "/collection.html";
+  });
+  document.getElementById("mobile-search").addEventListener("submit", (e) => {
     e.preventDefault();
     const q = e.target.q.value.trim();
     location.href = q ? `/collection.html?q=${encodeURIComponent(q)}` : "/collection.html";
@@ -93,7 +120,7 @@ function renderFooter() {
       <div class="site-footer__grid">
         <div>
           <h4>好物商城</h4>
-          <p class="text-muted" style="color:#999;">天天好物，件件優惠。一個為了作品集 Demo 虛構的電商平台。</p>
+          <p class="text-muted" style="color:#999;">天天好物，件件優惠。</p>
         </div>
         <div>
           <h4>購物指南</h4>
@@ -108,6 +135,7 @@ function renderFooter() {
           <ul>
             <li><a href="/account/login.html">會員登入</a></li>
             <li><a href="/account/orders.html">我的訂單</a></li>
+            <li><a href="/account/profile.html">個人資料</a></li>
             <li><a href="/admin/login.html">賣家後台</a></li>
           </ul>
         </div>
@@ -165,7 +193,7 @@ function updateCartUI() {
   if (!itemsEl || !footerEl) return;
 
   if (lines.length === 0) {
-    itemsEl.innerHTML = `<div class="cart-drawer__empty">購物車還是空的。<br><a href="/collection.html" class="btn btn--outline" style="margin-top:16px;">去逛逛</a></div>`;
+    itemsEl.innerHTML = `<div class="cart-drawer__empty">${emptyStateIcon(48)}<p>購物車還是空的。</p><a href="/collection.html" class="btn btn--outline">去逛逛</a></div>`;
     footerEl.innerHTML = "";
     return;
   }

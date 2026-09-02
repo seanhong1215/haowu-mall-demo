@@ -1,5 +1,6 @@
 import { json, errorJson } from "../../lib/json.js";
 import { requireAdmin, currentCustomerId } from "../../lib/auth.js";
+import { logAdminAction } from "../../lib/auditLog.js";
 
 const VALID_STATUSES = ["pending", "paid", "fulfilled", "cancelled"];
 const STATUS_LABEL_ZH = { pending: "已下單", paid: "已付款", fulfilled: "已出貨", cancelled: "已取消" };
@@ -81,6 +82,12 @@ export async function onRequestPatch({ request, params, env }) {
       needsTracking ? `商品已出貨，物流追蹤碼 ${trackingNumber}` : STATUS_NOTES[body.status] || null
     ),
   ]);
+
+  await logAdminAction(
+    env,
+    "order_status_changed",
+    `訂單 ${existing.order_number} 狀態改為「${STATUS_LABEL_ZH[body.status]}」`
+  );
 
   const updated = await env.DB.prepare(`SELECT * FROM orders WHERE id = ?`).bind(id).first();
   return json({ order: updated });

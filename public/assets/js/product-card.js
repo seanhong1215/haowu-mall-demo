@@ -29,8 +29,10 @@ function productCardHTML(p, rank) {
         <span class="price">
           ${onSale ? `<span class="price--compare">${formatPrice(p.compare_at_price_cents)}</span><span class="price--sale">${formatPrice(p.price_cents)}</span>` : formatPrice(p.price_cents)}
         </span>
-        <div class="free-shipping-tag">滿990免運</div>
-        <div class="sold-count">已售出 ${dailySoldCount(p.id)} 件</div>
+        <div class="product-card__meta">
+          <span class="free-shipping-tag">滿990免運</span>
+          <span class="sold-count">已售出 ${dailySoldCount(p.id)} 件</span>
+        </div>
       </div>
     </a>
   `;

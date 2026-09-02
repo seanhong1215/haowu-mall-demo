@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>個人資料 — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<main class="container" style="padding:32px 0 60px;max-width:640px;">
+  <p class="text-muted" style="margin-bottom:4px;"><a href="/account/orders.html">← 回到我的訂單</a></p>
+  <h1>個人資料</h1>
+
+  <div class="banner banner--error" id="profile-banner" hidden></div>
+  <div class="banner banner--success" id="profile-success" hidden></div>
+
+  <section class="auth-card" style="margin:0 0 24px;max-width:none;">
+    <h2 style="font-size:1.1rem;">基本資料</h2>
+    <form id="name-form" class="form-grid">
+      <div class="form-row">
+        <label for="name">姓名</label>
+        <input id="name" name="name" required>
+      </div>
+      <div class="form-row">
+        <label for="email">電子郵件</label>
+        <input id="email" name="email" type="email" required autocomplete="email">
+        <span class="text-muted" style="font-size:0.8rem;">Email 是登入帳號，變更時需要輸入目前密碼確認身分。</span>
+      </div>
+      <div class="form-row" id="email-password-row" hidden>
+        <label for="currentPasswordForEmail">目前密碼（變更 Email 時需要）</label>
+        <input id="currentPasswordForEmail" name="currentPasswordForEmail" type="password" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn--accent" style="align-self:flex-start;">儲存變更</button>
+    </form>
+  </section>
+
+  <section class="auth-card" style="margin:0;max-width:none;">
+    <h2 style="font-size:1.1rem;">變更密碼</h2>
+    <form id="password-form" class="form-grid">
+      <div class="form-row">
+        <label for="currentPassword">目前密碼</label>
+        <input id="currentPassword" name="currentPassword" type="password" required autocomplete="current-password">
+      </div>
+      <div class="form-row">
+        <label for="newPassword">新密碼</label>
+        <input id="newPassword" name="newPassword" type="password" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="form-row">
+        <label for="confirmPassword">確認新密碼</label>
+        <input id="confirmPassword" name="confirmPassword" type="password" required minlength="6" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn--outline" style="align-self:flex-start;">更新密碼</button>
+    </form>
+  </section>
+</main>
+
+<footer id="site-footer"></footer>
+<div id="cart-drawer-root"></div>
+
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/cart.js"></script>
+<script src="/assets/js/chrome.js"></script>
+<script src="/assets/js/account-profile.js"></script>
+</body>
+</html>
