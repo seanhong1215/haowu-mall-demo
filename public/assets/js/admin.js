@@ -32,13 +32,13 @@ function renderOrdersTable(orders) {
         ${orders
           .map(
             (o) => `
-          <tr data-id="${o.id}" style="cursor:pointer;" class="order-row">
+          <tr data-id="${o.id}" tabindex="0" role="button" aria-label="查看訂單 ${o.order_number}" class="order-row">
             <td data-label="訂單編號">${o.order_number}</td>
             <td data-label="客戶">${o.customer_name}<br><span class="text-muted">${o.customer_email}</span></td>
             <td data-label="下單時間">${formatDateTime(o.created_at)}</td>
             <td data-label="總計">${formatPrice(o.total_cents)}</td>
             <td data-label="狀態">
-              <select data-id="${o.id}" class="status-select">
+              <select data-id="${o.id}" class="status-select status-select--${o.status}" aria-label="訂單 ${o.order_number} 狀態">
                 ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
               </select>
             </td>
@@ -53,19 +53,32 @@ function renderOrdersTable(orders) {
     select.addEventListener("click", (e) => e.stopPropagation());
     select.addEventListener("change", async (e) => {
       const id = e.target.dataset.id;
+      const order = currentOrders.find((o) => o.id === Number(id));
+      const previousStatus = order?.status;
+      e.target.disabled = true;
       try {
         await Api.patch(`/api/orders/${id}`, { status: e.target.value });
-        const order = currentOrders.find((o) => o.id === Number(id));
         if (order) order.status = e.target.value;
+        e.target.className = `status-select status-select--${e.target.value}`;
         showBanner("訂單狀態已更新", false);
       } catch (err) {
+        if (previousStatus) e.target.value = previousStatus;
         showBanner(err.message);
+      } finally {
+        e.target.disabled = false;
       }
     });
   });
 
   tableWrap.querySelectorAll(".order-row").forEach((row) => {
     row.addEventListener("click", () => showOrderDetail(row.dataset.id));
+    row.addEventListener("keydown", (e) => {
+      if (e.target.closest("select, input, button, a")) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showOrderDetail(row.dataset.id);
+      }
+    });
   });
 }
 
@@ -103,15 +116,16 @@ function renderStatsCards(orders) {
   `;
 }
 
-function filterOrders(keyword) {
+function filterOrders(keyword, status = "all") {
   const q = keyword.trim().toLowerCase();
-  if (!q) return currentOrders;
-  return currentOrders.filter(
-    (o) =>
+  return currentOrders.filter((o) => {
+    const matchesStatus = status === "all" || o.status === status;
+    const matchesQuery = !q ||
       o.order_number.toLowerCase().includes(q) ||
       o.customer_name.toLowerCase().includes(q) ||
-      o.customer_email.toLowerCase().includes(q)
-  );
+      o.customer_email.toLowerCase().includes(q);
+    return matchesStatus && matchesQuery;
+  });
 }
 
 async function loadOrders() {
@@ -129,16 +143,25 @@ async function loadOrders() {
     ${renderStatsCards(currentOrders)}
     <div class="admin-toolbar">
       <input type="search" id="order-search" placeholder="搜尋訂單編號、客戶姓名或 Email" aria-label="搜尋訂單">
+      <select id="order-status-filter" aria-label="依訂單狀態篩選">
+        <option value="all">所有狀態</option>
+        ${STATUSES.map((s) => `<option value="${s}">${STATUS_LABEL[s]}</option>`).join("")}
+      </select>
     </div>
     <div id="orders-table-wrap"></div>
     <div id="order-detail"></div>
   `;
   renderOrdersTable(currentOrders);
 
-  document.getElementById("order-search").addEventListener("input", (e) => {
-    renderOrdersTable(filterOrders(e.target.value));
+  const refreshFilteredOrders = () => {
+    renderOrdersTable(filterOrders(
+      document.getElementById("order-search").value,
+      document.getElementById("order-status-filter").value
+    ));
     document.getElementById("order-detail").innerHTML = "";
-  });
+  };
+  document.getElementById("order-search").addEventListener("input", refreshFilteredOrders);
+  document.getElementById("order-status-filter").addEventListener("change", refreshFilteredOrders);
 }
 
 async function showOrderDetail(id) {

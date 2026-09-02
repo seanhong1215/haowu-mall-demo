@@ -14,6 +14,11 @@
 <main class="container checkout-layout">
   <div>
     <h1>結帳</h1>
+    <ol class="checkout-steps" aria-label="結帳進度">
+      <li>1 購物車</li>
+      <li aria-current="step">2 填寫資料</li>
+      <li>3 完成訂單</li>
+    </ol>
     <p class="text-muted" style="margin-bottom:24px;">這是一個 Demo 網站，不會收取真實款項。送出後會在資料庫建立一筆真實訂單，可在賣家後台查看。</p>
 
     <p class="text-muted" id="account-note" hidden style="margin-top:-16px;margin-bottom:20px;">您已使用會員身分登入 — 這筆訂單會出現在<a href="/account/orders.html">我的訂單</a>中。</p>
@@ -36,12 +41,12 @@
       <div class="form-row-2">
         <div class="form-row">
           <label for="cardNumber">信用卡卡號 <span class="text-muted">(demo — 不會送到我方伺服器，僅品牌與末四碼會保留)</span></label>
-          <input id="cardNumber" name="cardNumber" placeholder="4242 4242 4242 4242" required>
+          <input id="cardNumber" name="cardNumber" placeholder="4242 4242 4242 4242" required inputmode="numeric" autocomplete="cc-number" maxlength="23">
           <span class="text-muted" style="font-size:0.8rem;">試試 <code>4242 4242 4242 4242</code> 完成付款，或 <code>4000 0000 0000 0002</code> 體驗交易失敗。</span>
         </div>
         <div class="form-row">
           <label for="cardExpiry">有效期限</label>
-          <input id="cardExpiry" name="cardExpiry" placeholder="12/29" required>
+          <input id="cardExpiry" name="cardExpiry" placeholder="12/29" required inputmode="numeric" autocomplete="cc-exp" maxlength="5">
         </div>
       </div>
       <button type="submit" class="btn btn--accent btn--block">送出訂單</button>

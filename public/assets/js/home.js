@@ -59,9 +59,9 @@ function startCountdown() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const heroSection = document.getElementById("hero-section");
-  if (heroSection) heroSection.style.backgroundImage = `url('${brandPhotoUrl("hero", 1800, 700)}')`;
+  if (heroSection) heroSection.style.backgroundImage = "url('/assets/images/home-hero-premium.jpg')";
   const aboutImage = document.getElementById("about-image");
-  if (aboutImage) aboutImage.src = brandPhotoUrl("about", 900, 900);
+  if (aboutImage) aboutImage.src = "/assets/images/home-story-lifestyle.jpg";
 
   const iconsEl = document.getElementById("category-icons");
   if (iconsEl) {

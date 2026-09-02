@@ -52,7 +52,7 @@
 
       <div id="reviews-list" class="reviews__list"></div>
 
-      <button id="review-form-toggle" class="btn btn--outline" type="button" style="margin-top:20px;">撰寫評價</button>
+      <button id="review-form-toggle" class="btn btn--outline" type="button" style="margin-top:20px;" aria-expanded="false" aria-controls="review-form">撰寫評價</button>
 
       <form id="review-form" class="form-grid review-form" hidden>
         <h3 style="margin:0;font-size:1.05rem;">撰寫評價</h3>
@@ -96,6 +96,11 @@
     <div class="product-grid" id="recently-viewed-grid"></div>
   </section>
 </main>
+
+<div class="mobile-buy-bar" id="mobile-buy-bar" aria-label="快速購買">
+  <span class="price" id="mobile-product-price"></span>
+  <button class="btn btn--accent" id="mobile-add-to-cart" type="button">加入購物車</button>
+</div>
 
 <footer id="site-footer"></footer>
 <div id="cart-drawer-root"></div>
