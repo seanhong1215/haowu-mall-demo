@@ -1,20 +1,29 @@
 const STATUSES = ["pending", "paid", "fulfilled", "cancelled"];
+let currentOrders = [];
 
 function centsToDollarsInput(cents) {
   return (cents / 100).toFixed(2);
 }
 
-async function loadOrders() {
-  const panel = document.getElementById("panel-orders");
-  panel.innerHTML = `<p class="text-muted">訂單載入中…</p>`;
-  const { orders } = await Api.get("/api/orders");
+function showBanner(message, isError = true) {
+  const el = document.getElementById("admin-banner");
+  el.className = `banner ${isError ? "banner--error" : "banner--success"}`;
+  el.textContent = message;
+  el.hidden = false;
+  clearTimeout(showBanner._timer);
+  showBanner._timer = setTimeout(() => {
+    el.hidden = true;
+  }, 4000);
+}
 
+function renderOrdersTable(orders) {
+  const tableWrap = document.getElementById("orders-table-wrap");
   if (orders.length === 0) {
-    panel.innerHTML = `<p class="empty-state">目前尚無訂單——請先從前台結帳建立一筆訂單。</p>`;
+    tableWrap.innerHTML = `<p class="empty-state">找不到符合條件的訂單。</p>`;
     return;
   }
 
-  panel.innerHTML = `
+  tableWrap.innerHTML = `
     <table class="admin-table">
       <thead>
         <tr><th>訂單編號</th><th>客戶</th><th>下單時間</th><th>總計</th><th>狀態</th></tr>
@@ -38,23 +47,62 @@ async function loadOrders() {
           .join("")}
       </tbody>
     </table>
-    <div id="order-detail"></div>
   `;
 
-  panel.querySelectorAll(".status-select").forEach((select) => {
+  tableWrap.querySelectorAll(".status-select").forEach((select) => {
     select.addEventListener("click", (e) => e.stopPropagation());
     select.addEventListener("change", async (e) => {
       const id = e.target.dataset.id;
       try {
         await Api.patch(`/api/orders/${id}`, { status: e.target.value });
+        const order = currentOrders.find((o) => o.id === Number(id));
+        if (order) order.status = e.target.value;
+        showBanner("訂單狀態已更新", false);
       } catch (err) {
-        alert(err.message);
+        showBanner(err.message);
       }
     });
   });
 
-  panel.querySelectorAll(".order-row").forEach((row) => {
+  tableWrap.querySelectorAll(".order-row").forEach((row) => {
     row.addEventListener("click", () => showOrderDetail(row.dataset.id));
+  });
+}
+
+function filterOrders(keyword) {
+  const q = keyword.trim().toLowerCase();
+  if (!q) return currentOrders;
+  return currentOrders.filter(
+    (o) =>
+      o.order_number.toLowerCase().includes(q) ||
+      o.customer_name.toLowerCase().includes(q) ||
+      o.customer_email.toLowerCase().includes(q)
+  );
+}
+
+async function loadOrders() {
+  const panel = document.getElementById("panel-orders");
+  panel.innerHTML = `<p class="text-muted">訂單載入中…</p>`;
+  const { orders } = await Api.get("/api/orders");
+  currentOrders = orders;
+
+  if (orders.length === 0) {
+    panel.innerHTML = `<p class="empty-state">目前尚無訂單——請先從前台結帳建立一筆訂單。</p>`;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="admin-toolbar">
+      <input type="search" id="order-search" placeholder="搜尋訂單編號、客戶姓名或 Email" aria-label="搜尋訂單">
+    </div>
+    <div id="orders-table-wrap"></div>
+    <div id="order-detail"></div>
+  `;
+  renderOrdersTable(currentOrders);
+
+  document.getElementById("order-search").addEventListener("input", (e) => {
+    renderOrdersTable(filterOrders(e.target.value));
+    document.getElementById("order-detail").innerHTML = "";
   });
 }
 
@@ -89,6 +137,7 @@ async function loadInventory() {
   const { products } = await Api.get("/api/products?sort=title");
 
   panel.innerHTML = `
+    <div style="overflow-x:auto;">
     <table class="admin-table">
       <thead><tr><th>商品</th><th>價格（NT$）</th><th>規格</th><th>庫存</th></tr></thead>
       <tbody>
@@ -113,14 +162,16 @@ async function loadInventory() {
           .join("")}
       </tbody>
     </table>
+    </div>
   `;
 
   panel.querySelectorAll(".stock-input").forEach((input) => {
     input.addEventListener("change", async (e) => {
       try {
         await Api.patch(`/api/admin/variants/${e.target.dataset.variant}`, { inventory: Number(e.target.value) });
+        showBanner("庫存已更新", false);
       } catch (err) {
-        alert(err.message);
+        showBanner(err.message);
       }
     });
   });
@@ -129,8 +180,9 @@ async function loadInventory() {
       const cents = Math.round(Number(e.target.value) * 100);
       try {
         await Api.patch(`/api/products/${e.target.dataset.product}`, { price_cents: cents });
+        showBanner("價格已更新", false);
       } catch (err) {
-        alert(err.message);
+        showBanner(err.message);
       }
     });
   });
