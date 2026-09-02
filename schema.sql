@@ -237,3 +237,27 @@ INSERT INTO order_events (order_id, status, note, created_at) VALUES
 (5, 'fulfilled', '商品已出貨，物流追蹤碼 HCT4M8P2VXQ7', '2026-08-28 10:15:00'),
 (6, 'pending', NULL, '2026-08-31 20:10:00'),
 (6, 'paid', '已確認付款', '2026-08-31 20:33:00');
+
+-- ---------- 補齊各分類的商品數 ----------
+-- 首頁每個分類精選列固定取 5 件，但 3C家電／美妝保養／時尚服飾／食品雜貨
+-- 原本各只有 4 件，那幾排永遠只排得出 4 張卡；各補一件湊滿 5 件。
+-- 一律接在檔案最後，避免插在中間造成既有 product_id / variant_id 位移，
+-- 那會連帶打壞下面訂單種子資料的外鍵對應。
+INSERT INTO products (slug, title, description, collection, price_cents, compare_at_price_cents, image_seed) VALUES
+('bt-speaker', '防水藍牙喇叭', '360 度環繞音場、IPX7 防水，續航 12 小時，露營野餐帶著走都不怕。', '3C家電', 89000, 109000, 'gadget-speaker'),
+('face-cream', '玻尿酸保濕面霜', '複方玻尿酸與神經醯胺，質地綿密好推開，冷氣房待整天也不緊繃。', '美妝保養', 68000, NULL, 'beauty-cream'),
+('canvas-shoes', '厚底帆布休閒鞋', '橡膠厚底鞋型俐落，鞋墊加厚回彈，素色好搭、久走不磨腳。', '時尚服飾', 118000, NULL, 'fashion-sneakers'),
+('drip-coffee', '精品濾掛式咖啡（10入）', '中深焙單品豆現磨填充，堅果與可可尾韻，沖一杯只要三分鐘。', '食品雜貨', 42000, 49000, 'grocery-coffee');
+
+INSERT INTO product_variants (product_id, option_name, value, inventory) VALUES
+(27, '顏色', '石墨黑', 22), (27, '顏色', '沙岩色', 14),
+(28, '容量', '50ml', 31),
+(29, '尺寸', '24', 9), (29, '尺寸', '25', 15), (29, '尺寸', '26', 12), (29, '尺寸', '27', 3),
+(30, '規格', '10入裝', 38);
+
+INSERT INTO reviews (product_id, author_name, rating, comment, created_at) VALUES
+(27, '莊士豪', 5, '低音比想像中扎實，帶去海邊玩水濺到也沒事。', datetime('now', '-5 days')),
+(27, '游宜靜', 4, '音質很好，只是充飽電要三小時左右。', datetime('now', '-11 days')),
+(28, '簡佩琪', 5, '擦起來不黏膩，早上上妝前用也不會搓泥。', datetime('now', '-7 days')),
+(29, '范植偉', 4, '鞋子很輕，尺寸偏小建議大半號。', datetime('now', '-9 days')),
+(30, '邱建豪', 5, '辦公室沖很方便，香氣比超商濾掛好上不少。', datetime('now', '-2 days'));

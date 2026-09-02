@@ -84,6 +84,10 @@ const PEXELS_PHOTO_ID = {
   "grocery-nuts": 86649,
   "grocery-oliveoil": 7296399,
   "grocery-chicken": 30635713,
+  "gadget-speaker": 374114,
+  "beauty-cream": 4173450,
+  "fashion-sneakers": 4296075,
+  "grocery-coffee": 7657837,
 };
 
 function pexelsUrl(id, w, h) {
