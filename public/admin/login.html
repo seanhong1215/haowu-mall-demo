@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Admin — 好物商城</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body class="admin-shell">
+<div class="admin-login">
+  <h1 style="font-size:1.4rem;">Store admin</h1>
+  <p class="text-muted">Demo credentials: password is <code>demo1234</code> unless the ADMIN_PASSWORD environment variable was changed.</p>
+  <div class="banner banner--error" id="login-banner" hidden></div>
+  <form id="login-form" class="form-grid">
+    <div class="form-row">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required autofocus>
+    </div>
+    <button type="submit" class="btn btn--accent btn--block">Log in</button>
+  </form>
+  <p style="margin-top:20px;"><a href="/index.html" class="text-muted">← Back to store</a></p>
+</div>
+
+<script src="/assets/js/api.js"></script>
+<script>
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const banner = document.getElementById("login-banner");
+  banner.hidden = true;
+  try {
+    await Api.post("/api/admin/login", { password: e.target.password.value });
+    location.href = "/admin/index.html";
+  } catch (err) {
+    banner.hidden = false;
+    banner.textContent = err.message;
+  }
+});
+</script>
+</body>
+</html>
