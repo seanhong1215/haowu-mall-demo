@@ -497,17 +497,21 @@ body.cart-open .cart-drawer { transform: translateX(0); }
 .site-footer a:hover { color: #fff; }
 .site-footer__bottom { margin-top: 32px; padding-top: 20px; border-top: 1px solid #444; font-size: 0.78rem; color: #999; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
-/* ---------- admin (後台，維持原簡約風格，與前台區隔) ---------- */
-.admin-shell { min-height: 100vh; background: #faf7f2; --color-text: #2b2621; --color-bg-alt: #f1ece2; --color-border: #e3dbcb; }
-.admin-topbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 28px; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
-.admin-topbar__logo { font-size: 1.1rem; font-weight: 700; }
+/* ---------- admin（後台）——沿用前台的設計語彙（配色、字體），
+   資料密集的表格區維持白底以利閱讀，僅品牌元素（logo、分頁、按鈕）走紅色主色調 */
+.admin-shell { min-height: 100vh; background: var(--color-bg); }
+.admin-topbar {
+  display: flex; justify-content: space-between; align-items: center; padding: 16px 28px;
+  border-bottom: 2px solid var(--color-accent); background: var(--color-surface);
+}
+.admin-topbar__logo { font-size: 1.15rem; font-weight: 900; color: var(--color-accent); }
 .admin-main { padding: 32px 28px; max-width: 1100px; margin: 0 auto; }
 .admin-tabs { display: flex; gap: 6px; margin-bottom: 24px; }
 .admin-tabs button {
   padding: 0.6em 1.2em; border: 1px solid var(--color-border); background: var(--color-surface);
   cursor: pointer; border-radius: var(--radius); font-size: 0.9rem;
 }
-.admin-tabs button[aria-selected="true"] { background: var(--color-text); color: #fff; border-color: var(--color-text); }
+.admin-tabs button[aria-selected="true"] { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
 .admin-toolbar { margin-bottom: 16px; }
 .admin-toolbar input[type="search"] {
   width: 100%; max-width: 360px; padding: 0.6em 0.9em; border: 1px solid var(--color-border);
@@ -522,7 +526,7 @@ body.cart-open .cart-drawer { transform: translateX(0); }
 .status-pill--paid { background: #e6eef7; color: #3a5c86; }
 .status-pill--fulfilled { background: var(--color-success-bg); color: var(--color-success); }
 .status-pill--cancelled { background: var(--color-error-bg); color: var(--color-error); }
-.admin-login { max-width: 360px; margin: 12vh auto; padding: 0 24px; }
+.admin-login { max-width: 400px; margin: 12vh auto; padding: 32px; background: var(--color-surface); border-radius: var(--radius); box-shadow: var(--shadow); }
 .inline-input { width: 70px; padding: 0.4em; border: 1px solid var(--color-border); border-radius: var(--radius); font-size: 0.85rem; }
 .admin-order-detail { background: var(--color-surface); box-shadow: var(--shadow); padding: 24px; margin-top: 16px; }
 .text-muted { color: var(--color-text-muted); }
