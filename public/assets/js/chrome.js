@@ -166,7 +166,7 @@ function updateCartUI() {
   if (!itemsEl || !footerEl) return;
 
   if (lines.length === 0) {
-    itemsEl.innerHTML = `<div class="cart-drawer__empty">購物車還是空的。<br><a href="/collection.html" class="btn btn--outline" style="margin-top:16px;">去逛逛</a></div>`;
+    itemsEl.innerHTML = `<div class="cart-drawer__empty">${emptyStateIcon(48)}<p>購物車還是空的。</p><a href="/collection.html" class="btn btn--outline">去逛逛</a></div>`;
     footerEl.innerHTML = "";
     return;
   }

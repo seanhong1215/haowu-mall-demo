@@ -17,7 +17,7 @@ async function loadCollection() {
       : collection;
 
   const grid = document.getElementById("collection-grid");
-  grid.innerHTML = `<p class="text-muted">商品載入中…</p>`;
+  grid.innerHTML = skeletonCardsHTML(10);
 
   const query = new URLSearchParams();
   if (collection !== "全部" && !q) query.set("collection", collection);
@@ -28,7 +28,7 @@ async function loadCollection() {
     const products = q ? all.filter((p) => p.title.includes(q) || p.description.includes(q)) : all;
     grid.innerHTML = products.length
       ? products.map((p) => productCardHTML(p)).join("")
-      : `<p class="empty-state">找不到符合條件的商品。</p>`;
+      : `<div class="empty-state">${emptyStateIcon()}<p>找不到符合條件的商品。</p></div>`;
   } catch (err) {
     grid.innerHTML = `<p class="banner banner--error">商品載入失敗：${err.message}</p>`;
   }
