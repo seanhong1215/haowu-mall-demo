@@ -9,8 +9,8 @@
   --color-surface: #ffffff;
   --color-text: #222222;
   --color-text-muted: #888888;
-  --color-accent: #d6304a;
-  --color-accent-dark: #ab2439;
+  --color-accent: #c33a50;
+  --color-accent-dark: #9c2c3f;
   --color-accent-2: #ff6600;
   --color-border: #ebebeb;
   --color-success: #00a86b;
@@ -162,18 +162,24 @@ button { font-family: inherit; }
 }
 
 /* ---------- category nav bar ---------- */
+/* A solid red band here (always visible, every page, every scroll
+   position) is what actually reads as "harsh" — not just the hex value.
+   Keeping the color as an accent (text + underline) instead of a fill
+   still says "brand red" without a wall of saturated color. */
 .category-nav {
-  background: var(--color-accent); overflow-x: auto;
+  background: var(--color-surface); overflow-x: auto; border-bottom: 1px solid var(--color-border);
 }
 .category-nav__list {
   display: flex; gap: 4px; list-style: none; margin: 0; padding: 0 20px;
   max-width: var(--max-width); margin-inline: auto; white-space: nowrap;
 }
 .category-nav__list a {
-  display: block; padding: 10px 16px; color: #fff; text-decoration: none;
-  font-size: 0.86rem; font-weight: 500;
+  display: block; padding: 12px 16px; color: var(--color-text); text-decoration: none;
+  font-size: 0.86rem; font-weight: 500; border-bottom: 2px solid transparent;
 }
-.category-nav__list a:hover, .category-nav__list a[aria-current="page"] { background: rgba(0,0,0,0.15); }
+.category-nav__list a:hover, .category-nav__list a[aria-current="page"] {
+  color: var(--color-accent); border-color: var(--color-accent);
+}
 
 /* ---------- announcement bar ---------- */
 .announcement-bar {
