@@ -133,6 +133,13 @@ function renderBuyBox(p) {
   const needsSelection = p.variants.length > 0 && !selectedVariantId;
   addBtn.disabled = needsSelection || inventory <= 0;
   addBtn.textContent = inventory <= 0 ? "已售完" : needsSelection ? "請選擇規格" : "加入購物車";
+  const mobilePrice = document.getElementById("mobile-product-price");
+  const mobileAddBtn = document.getElementById("mobile-add-to-cart");
+  if (mobilePrice) mobilePrice.innerHTML = document.getElementById("product-price").innerHTML;
+  if (mobileAddBtn) {
+    mobileAddBtn.disabled = addBtn.disabled;
+    mobileAddBtn.textContent = addBtn.textContent;
+  }
 }
 
 function renderReviews() {
@@ -257,7 +264,9 @@ document.addEventListener("DOMContentLoaded", () => {
       renderReviews();
       form.reset();
       form.hidden = true;
-      document.getElementById("review-form-toggle").hidden = false;
+      const toggle = document.getElementById("review-form-toggle");
+      toggle.hidden = false;
+      toggle.setAttribute("aria-expanded", "false");
     } catch (err) {
       banner.hidden = false;
       banner.textContent = err.message;
@@ -268,6 +277,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("review-form-toggle").addEventListener("click", (e) => {
     e.target.hidden = true;
+    e.target.setAttribute("aria-expanded", "true");
     document.getElementById("review-form").hidden = false;
+    document.getElementById("authorName").focus();
+  });
+
+  document.getElementById("mobile-add-to-cart").addEventListener("click", () => {
+    document.getElementById("add-to-cart").click();
   });
 });

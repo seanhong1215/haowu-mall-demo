@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "description": "好物商城 — full-stack e-commerce demo",
   "scripts": {
+    "build:functions": "wrangler pages functions build --outdir=dist/worker",
     "db:init": "wrangler d1 execute haowu_mall --local --file=schema.sql",
     "db:init:remote": "wrangler d1 execute haowu_mall --remote --file=schema.sql",
-    "dev": "wrangler pages dev --compatibility-date=2024-09-23 --compatibility-flags=nodejs_compat",
-    "deploy": "wrangler pages deploy public"
+    "dev": "npm run build:functions && wrangler dev",
+    "deploy": "npm run build:functions && wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

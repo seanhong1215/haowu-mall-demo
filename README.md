@@ -2,7 +2,7 @@
 
 全端電商作品集 Demo — 前台購物、會員系統、後台管理，全部是真實運作的功能，不是靜態畫面。
 
-視覺與版面參考 PChome、momo 等台灣主流購物網站：密集商品網格、紅色主色調、限時搶購倒數、熱銷排行榜。商品橫跨 3C家電、美妝保養、時尚服飾、生活居家、食品雜貨五大類（共 26 件），全站繁體中文、新台幣計價。
+視覺走沉穩黑白紅路線：大面積留白搭配質感情境攝影，商品陳列走精選選物路線，同時保留台灣電商熟悉的購物邏輯——限時搶購倒數、熱銷排行榜、五大分類陳列。商品橫跨 3C家電、美妝保養、時尚服飾、生活居家、食品雜貨五大類（共 30 件），全站繁體中文、新台幣計價。
 
 ![好物商城前後台使用者流程 Demo](docs/demo.gif)
 
@@ -23,7 +23,7 @@
 ## 功能亮點
 
 **前台**
-- 首頁：限時搶購倒數、熱銷排行榜、五大分類商品陳列、新會員優惠券
+- 首頁：情境攝影 Hero、限時搶購倒數、熱銷排行榜、五大分類商品陳列、品牌故事區塊、新會員優惠券
 - 商品列表：分類篩選、排序、關鍵字搜尋
 - 商品詳情：規格選擇、星等評價與真實留言、即時庫存狀態、最近瀏覽紀錄
 - 購物車：側邊抽屜與完整頁面同步
@@ -45,11 +45,11 @@
 | 層 | 技術 |
 |---|---|
 | 前台 | 純 HTML + CSS + Vanilla JS（無框架、無建置步驟） |
-| 後端 API | Cloudflare Pages Functions |
+| 後端 API | Cloudflare Workers（由 Pages Functions 原始碼編譯） |
 | 資料庫 | Cloudflare D1（SQLite） |
-| 部署 | Cloudflare Pages 免費方案 |
+| 部署 | Cloudflare Workers + Static Assets |
 
-全站皆落在 Cloudflare 免費額度內：Pages 託管無流量上限、D1 每日 500 萬次讀取。
+前台靜態檔案、後端 API 與 D1 綁定由同一個 Worker 部署，日後可直接擴充後端路由與資料表。
 
 ---
 
@@ -69,7 +69,7 @@
 │       ├── css/style.css
 │       └── js/             # 各頁邏輯 + 共用元件（api、cart、chrome、product-card…）
 │
-├── functions/api/          # 後端 API（Cloudflare Pages Functions）
+├── functions/api/          # 後端 API 原始碼（部署前編譯為 Worker）
 │   ├── products.js / products/[id].js
 │   ├── reviews.js
 │   ├── orders.js / orders/[id].js
@@ -97,11 +97,10 @@ npm run dev           # http://localhost:8788
 npx wrangler login
 npx wrangler d1 create haowu_mall     # 回傳的 database_id 填進 wrangler.toml
 npm run db:init:remote
-npx wrangler pages project create haowu-mall
 npm run deploy
 ```
 
-部署後到 Cloudflare Dashboard → Pages 專案 → Settings → Environment variables，設定正式環境的 `ADMIN_PASSWORD` 與 `ADMIN_SECRET`。
+部署後到 Cloudflare Dashboard → Workers & Pages → `haowu-mall-demo` → Settings → Variables and Secrets，設定正式環境的 `ADMIN_PASSWORD` 與 `ADMIN_SECRET`。正式網址為 `https://haowu-mall-demo.shawnhong1215.workers.dev`。
 
 ---
 
@@ -109,5 +108,5 @@ npm run deploy
 
 - 會員與後台驗證為簡化版（單一密碼、無 Email 驗證/忘記密碼）
 - 付款為模擬（`4242 4242 4242 4242` 成功、`4000 0000 0000 0002` 失敗），未串接真實金流
-- 商品照片為佔位圖，非真實商品攝影
+- 商品照片為精選 Pexels 免版稅圖庫照片，非店家實際商品拍攝
 - 物流追蹤碼、瀏覽人數、已售件數為展示用途，非真實數據
