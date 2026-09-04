@@ -20,6 +20,8 @@ CREATE TABLE products (
   price_cents INTEGER NOT NULL,
   compare_at_price_cents INTEGER,
   image_seed TEXT NOT NULL,
+  -- 'active'：前台可見；'draft'：僅後台可見，用於還沒準備好上架的商品
+  status TEXT NOT NULL DEFAULT 'active',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

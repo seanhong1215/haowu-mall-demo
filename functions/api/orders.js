@@ -13,8 +13,13 @@ const TAX_RATE = 0;
 export async function onRequestGet({ request, env }) {
   if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
 
+  // 後台列表要在不展開訂單的情況下看出買了什麼，所以多帶第一項商品名稱
+  // 與總件數，讓前端組成「防水藍牙喇叭 等 2 件」這樣的摘要。
   const { results: orders } = await env.DB.prepare(
-    `SELECT * FROM orders ORDER BY created_at DESC`
+    `SELECT o.*,
+            (SELECT title FROM order_items WHERE order_id = o.id ORDER BY id LIMIT 1) AS first_item_title,
+            (SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE order_id = o.id) AS item_count
+     FROM orders o ORDER BY o.created_at DESC`
   ).all();
   return json({ orders });
 }
