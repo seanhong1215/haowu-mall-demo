@@ -299,7 +299,7 @@ function renderOrdersTable(orders) {
           .map(
             (o) => `<tr class="order-row" data-id="${o.id}" tabindex="0" role="button" aria-label="查看訂單 ${esc(o.order_number)}">
             <td data-label="訂單編號" class="nowrap"><span class="admin-table__code">${esc(o.order_number)}</span></td>
-            <td data-label="客戶"><b>${esc(o.customer_name)}</b><span class="admin-table__sub">${esc(o.customer_email)}</span></td>
+            <td data-label="客戶"><span><b>${esc(o.customer_name)}</b><span class="admin-table__sub">${esc(o.customer_email)}</span></span></td>
             <td data-label="下單時間" class="nowrap text-muted">${formatDateTime(o.created_at)}</td>
             <td data-label="商品">${itemSummary(o)}</td>
             <td data-label="總計" class="num"><strong>${formatPrice(o.total_cents)}</strong></td>
@@ -308,7 +308,7 @@ function renderOrdersTable(orders) {
                 ${STATUSES.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${STATUS_LABEL[s]}</option>`).join("")}
               </select>
             </td>
-            <td><span class="admin-table__chevron">${icon("chevron-right", 16)}</span></td>
+            <td class="is-chevron"><span class="admin-table__chevron">${icon("chevron-right", 16)}</span></td>
           </tr>`
           )
           .join("")}
