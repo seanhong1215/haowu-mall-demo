@@ -8,35 +8,93 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
 <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body class="admin-shell">
-<div class="admin-login">
-  <h1 style="font-size:1.4rem;">賣家後台</h1>
-  <p class="text-muted">Demo 密碼為 <code>demo1234</code>（除非已透過環境變數 ADMIN_PASSWORD 另行設定）。</p>
-  <div class="banner banner--error" id="login-banner" hidden></div>
-  <form id="login-form" class="form-grid">
-    <div class="form-row">
-      <label for="password">密碼</label>
-      <input id="password" name="password" type="password" required autofocus>
+<body>
+<div class="admin-login-split">
+  <div class="admin-login-split__aside">
+    <a class="admin-sidebar__brand" href="/index.html" style="padding:0">
+      <span class="admin-sidebar__mark"></span>
+      <span class="admin-sidebar__name"><b>好物商城</b><span>賣家後台</span></span>
+    </a>
+    <div>
+      <h2>訂單、庫存、會員<br>一個後台全部看得到</h2>
+      <p>前台送出的每一筆訂單即時進來，狀態一改，客戶的訂單追蹤頁同步更新——同一份資料，兩邊不用對帳。</p>
     </div>
-    <button type="submit" class="btn btn--accent btn--block">登入</button>
-  </form>
-  <p style="margin-top:20px;"><a href="/index.html" class="text-muted">← 回到前台</a></p>
+    <div class="admin-login-split__figures">
+      <div><b id="fig-products">—</b><span>在架商品</span></div>
+      <div><b id="fig-collections">—</b><span>商品分類</span></div>
+      <div><b id="fig-variants">—</b><span>商品規格</span></div>
+    </div>
+  </div>
+
+  <div class="admin-login-split__panel">
+    <div class="admin-login-card">
+      <h1>登入後台</h1>
+      <p>請輸入管理密碼以繼續。</p>
+      <div class="admin-card">
+        <div class="banner banner--error" id="login-banner" hidden></div>
+        <form id="login-form">
+          <div class="admin-field" style="margin-bottom:18px;">
+            <label for="password">密碼</label>
+            <div class="admin-password">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8.6" width="12" height="8.4" rx="1.6"/><path d="M6.8 8.6V6.4a3.2 3.2 0 0 1 6.4 0v2.2"/></svg>
+              <input id="password" name="password" type="password" required autofocus autocomplete="current-password">
+              <button type="button" id="toggle-password" aria-label="顯示密碼">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 10S4.9 4.8 10 4.8 18.2 10 18.2 10 15.1 15.2 10 15.2 1.8 10 1.8 10Z"/><circle cx="10" cy="10" r="2.2"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn--accent btn--block">登入</button>
+        </form>
+        <div class="admin-demo-note">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.3 2.6 16.2h14.8L10 3.3Z"/><path d="M10 8v3.4M10 13.7v.1"/></svg>
+          <span>這是作品集 Demo，密碼為 <code>demo1234</code>，可由環境變數 ADMIN_PASSWORD 覆寫。</span>
+        </div>
+      </div>
+      <p class="admin-login-back"><a href="/index.html">← 回到前台</a></p>
+    </div>
+  </div>
 </div>
 
 <script src="/assets/js/api.js"></script>
 <script>
-document.getElementById("login-form").addEventListener("submit", async (e) => {
+const form = document.getElementById("login-form");
+const banner = document.getElementById("login-banner");
+const passwordInput = document.getElementById("password");
+
+document.getElementById("toggle-password").addEventListener("click", (e) => {
+  const shown = passwordInput.type === "text";
+  passwordInput.type = shown ? "password" : "text";
+  e.currentTarget.setAttribute("aria-label", shown ? "顯示密碼" : "隱藏密碼");
+  passwordInput.focus();
+});
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const banner = document.getElementById("login-banner");
+  const submit = form.querySelector("button[type=submit]");
   banner.hidden = true;
+  submit.disabled = true;
   try {
-    await Api.post("/api/admin/login", { password: e.target.password.value });
+    await Api.post("/api/admin/login", { password: passwordInput.value });
     location.href = "/admin/index.html";
   } catch (err) {
     banner.hidden = false;
     banner.textContent = err.message;
+    passwordInput.select();
+  } finally {
+    submit.disabled = false;
   }
 });
+
+// 左側三個數字全部取自公開的商品 API，登入前就能看到這間店的真實規模。
+// 訂單與會員數需要授權，所以刻意不放在這裡。
+(async () => {
+  try {
+    const { products } = await Api.get("/api/products");
+    document.getElementById("fig-products").textContent = products.length;
+    document.getElementById("fig-collections").textContent = new Set(products.map((p) => p.collection)).size;
+    document.getElementById("fig-variants").textContent = products.reduce((n, p) => n + p.variants.length, 0);
+  } catch { /* API 掛掉時不要擋住登入 */ }
+})();
 </script>
 </body>
 </html>
