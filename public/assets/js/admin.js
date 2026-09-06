@@ -995,10 +995,17 @@ async function renderProductForm(productId) {
 
     e.currentTarget.disabled = true;
     try {
-      if (isEdit) await Api.patch(`/api/products/${productId}`, payload);
-      else await Api.post("/api/products", payload);
-      flash(isEdit ? "商品已儲存" : "商品已建立", false);
-      switchView("catalog");
+      if (isEdit) {
+        await Api.patch(`/api/products/${productId}`, payload);
+        flash("商品已儲存", false);
+        switchView("catalog");
+      } else {
+        const { product: created } = await Api.post("/api/products", payload);
+        flash("商品已建立", false);
+        // 圖片要有商品 id 才能上傳，所以新增成功後直接進編輯頁，不用使用者
+        // 回列表再找一次剛剛那筆。
+        switchView("catalog", { form: true, productId: created.id });
+      }
     } catch (err) {
       flash(err.message);
       e.currentTarget.disabled = false;
