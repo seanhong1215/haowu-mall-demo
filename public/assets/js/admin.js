@@ -12,10 +12,20 @@ const subtitleEl = document.getElementById("page-subtitle");
 const actionsEl = document.getElementById("page-actions");
 const viewEl = document.getElementById("admin-view");
 
-let ordersCache = [];
 let productsCache = [];
-let ordersPage = 1;
 let catalogPage = 1;
+// 訂單列表改成伺服器端分頁／篩選 —— 這裡只記查詢條件，資料一律現查現拿，
+// 不在前端囤一份全部訂單。
+let ordersQuery = { page: 1, pageSize: PAGE_SIZE, status: "all", q: "" };
+
+// 搜尋框每個按鍵都打 API 太浪費，停手 300ms 後才真的送出查詢。
+function debounce(fn, wait) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
 
 // ---------- 小工具 ----------
 
@@ -82,31 +92,19 @@ function switchView(view, options = {}) {
 
 // ---------- 訂單：統計卡 ----------
 
-function renderStats(orders) {
-  const now = new Date();
-  const pending = orders.filter((o) => o.status === "pending").length;
-  const monthRevenue = orders
-    .filter((o) => {
-      if (o.status === "cancelled") return false;
-      const d = new Date(o.created_at.replace(" ", "T") + "Z");
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-    })
-    .reduce((sum, o) => sum + o.total_cents, 0);
-  const cancelled = orders.filter((o) => o.status === "cancelled").length;
-  const cancelledRecently = orders.filter(
-    (o) => o.status === "cancelled" && Date.now() - new Date(o.created_at.replace(" ", "T") + "Z") < 30 * 864e5
-  ).length;
-
+// summary 來自 /api/orders/summary（伺服器端聚合），不是把全部訂單抓回來
+// 在瀏覽器裡算 —— 訂單一多，前端囤資料、算統計、算折線圖都會越來越慢。
+function renderStats(summary) {
   const cards = [
-    { label: "待處理訂單", value: pending, hint: "已下單、待付款／出貨", primary: true },
-    { label: "本月營收", value: formatPrice(monthRevenue), hint: "不含已取消訂單" },
-    { label: "訂單總數", value: orders.length, hint: "目前資料庫全部訂單" },
-    { label: "已取消訂單", value: cancelled, hint: `近 30 天 ${cancelledRecently} 筆` },
+    { label: "待處理訂單", value: summary.pendingCount, hint: "已下單、待付款／出貨", primary: true },
+    { label: "本月營收", value: formatPrice(summary.monthRevenueCents), hint: "不含已取消訂單" },
+    { label: "訂單總數", value: summary.totalCount, hint: "目前資料庫全部訂單" },
+    { label: "已取消訂單", value: summary.cancelledCount, hint: `近 30 天 ${summary.cancelledRecentCount} 筆` },
   ];
 
   const badge = document.getElementById("nav-pending");
-  badge.textContent = pending;
-  badge.hidden = pending === 0;
+  badge.textContent = summary.pendingCount;
+  badge.hidden = summary.pendingCount === 0;
 
   return `<div class="admin-stats">
     ${cards
@@ -125,7 +123,9 @@ function renderStats(orders) {
 
 // 座標系固定 1092×240，靠 viewBox 隨容器縮放；單一數列所以不需要圖例，
 // 只在最高點與最新一天做直接標示，其餘交給 X／Y 軸。
-function renderRevenueChart(orders) {
+// dailyRevenue：[{date:"YYYY-MM-DD", cents}, ...30 筆，已依台灣時區(UTC+8)
+// 補滿沒有訂單的日期]，由 /api/orders/summary 算好直接給。
+function renderRevenueChart(dailyRevenue) {
   const DAYS = 30;
   const W = 1092;
   const H = 240;
@@ -134,23 +134,9 @@ function renderRevenueChart(orders) {
   const PT = 18;
   const PB = 30;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const buckets = [];
-  for (let i = DAYS - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    buckets.push({ date: d, cents: 0 });
-  }
-  const firstDay = buckets[0].date.getTime();
-
-  for (const o of orders) {
-    if (o.status === "cancelled") continue;
-    const d = new Date(o.created_at.replace(" ", "T") + "Z");
-    d.setHours(0, 0, 0, 0);
-    const index = Math.round((d.getTime() - firstDay) / 864e5);
-    if (index >= 0 && index < DAYS) buckets[index].cents += o.total_cents;
-  }
+  // 日期字串已經是正確的台灣曆日，用 UTC 解析＋UTC getter 顯示，避免瀏覽器
+  // 又用自己的時區重新詮釋一次而跑掉一天。
+  const buckets = dailyRevenue.map((d) => ({ date: new Date(`${d.date}T00:00:00Z`), cents: d.cents }));
 
   const total = buckets.reduce((sum, b) => sum + b.cents, 0);
   const peak = buckets.reduce((best, b) => (b.cents > best.cents ? b : best), buckets[0]);
@@ -184,7 +170,7 @@ function renderRevenueChart(orders) {
     .map((i) => {
       const d = buckets[i].date;
       const anchor = i === 0 ? "start" : i === DAYS - 1 ? "end" : "middle";
-      return `<text class="admin-chart__axis" x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="${anchor}">${d.getMonth() + 1}/${String(d.getDate()).padStart(2, "0")}</text>`;
+      return `<text class="admin-chart__axis" x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="${anchor}">${d.getUTCMonth() + 1}/${String(d.getUTCDate()).padStart(2, "0")}</text>`;
     })
     .join("");
 
@@ -204,7 +190,7 @@ function renderRevenueChart(orders) {
     );
   }
 
-  const peakLabel = `${peak.date.getMonth() + 1}/${peak.date.getDate()}`;
+  const peakLabel = `${peak.date.getUTCMonth() + 1}/${peak.date.getUTCDate()}`;
 
   return `<div class="admin-card admin-chart">
     <div class="admin-card__head">
@@ -230,23 +216,10 @@ function renderRevenueChart(orders) {
 
 // ---------- 訂單列表 ----------
 
-function filterOrders(keyword, status) {
-  const q = keyword.trim().toLowerCase();
-  return ordersCache.filter((o) => {
-    const matchesStatus = status === "all" || o.status === status;
-    const matchesQuery =
-      !q ||
-      o.order_number.toLowerCase().includes(q) ||
-      o.customer_name.toLowerCase().includes(q) ||
-      o.customer_email.toLowerCase().includes(q);
-    return matchesStatus && matchesQuery;
-  });
-}
-
-function pager(total, page, onPage) {
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const to = Math.min(total, page * PAGE_SIZE);
+function pager(total, page, pageSize, onPage) {
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(total, page * pageSize);
   const numbers = [];
   for (let p = 1; p <= pages; p++) {
     if (pages > 7 && p !== 1 && p !== pages && Math.abs(p - page) > 1) {
@@ -279,15 +252,12 @@ function pager(total, page, onPage) {
   return wrap;
 }
 
-function renderOrdersTable(orders) {
+function renderOrdersTable(orders, total) {
   const wrap = document.getElementById("orders-table-wrap");
   if (orders.length === 0) {
     wrap.innerHTML = `<div class="admin-table-card"><p class="empty-state">找不到符合條件的訂單。</p></div>`;
     return;
   }
-
-  const start = (ordersPage - 1) * PAGE_SIZE;
-  const pageRows = orders.slice(start, start + PAGE_SIZE);
 
   wrap.innerHTML = `<div class="admin-table-card">
     <table class="admin-table">
@@ -295,7 +265,7 @@ function renderOrdersTable(orders) {
         <tr><th>訂單編號</th><th>客戶</th><th>下單時間</th><th>商品</th><th class="num">總計</th><th>狀態</th><th></th></tr>
       </thead>
       <tbody>
-        ${pageRows
+        ${orders
           .map(
             (o) => `<tr class="order-row" data-id="${o.id}" tabindex="0" role="button" aria-label="查看訂單 ${esc(o.order_number)}">
             <td data-label="訂單編號" class="nowrap"><span class="admin-table__code">${esc(o.order_number)}</span></td>
@@ -317,9 +287,9 @@ function renderOrdersTable(orders) {
   </div>`;
 
   wrap.querySelector(".admin-table-card").appendChild(
-    pager(orders.length, ordersPage, (p) => {
-      ordersPage = p;
-      renderOrdersTable(orders);
+    pager(total, ordersQuery.page, ordersQuery.pageSize, (p) => {
+      ordersQuery.page = p;
+      loadOrdersPage();
     })
   );
 
@@ -328,19 +298,19 @@ function renderOrdersTable(orders) {
     select.addEventListener("keydown", (e) => e.stopPropagation());
     select.addEventListener("change", async (e) => {
       const id = Number(e.target.dataset.id);
-      const order = ordersCache.find((o) => o.id === id);
-      const previous = order?.status;
+      const previous = orders.find((o) => o.id === id)?.status;
       e.target.disabled = true;
       try {
         await Api.patch(`/api/orders/${id}`, { status: e.target.value });
-        if (order) order.status = e.target.value;
-        e.target.className = `status-select status-select--${e.target.value}`;
         flash("訂單狀態已更新", false);
+        // 狀態一變，篩選條件可能就不再涵蓋這筆訂單（例如篩「已下單」時
+        // 改成「已出貨」），加上統計卡與側邊欄未讀數也要跟著動，所以
+        // 兩邊都重新拉一次，而不是只改這一列的樣式。
+        await Promise.all([loadOrdersPage(), refreshOrdersSummary()]);
       } catch (err) {
         if (previous) e.target.value = previous;
-        flash(err.message);
-      } finally {
         e.target.disabled = false;
+        flash(err.message);
       }
     });
   });
@@ -360,22 +330,52 @@ function renderOrdersTable(orders) {
   });
 }
 
+function ordersApiParams() {
+  const params = new URLSearchParams({ page: ordersQuery.page, pageSize: ordersQuery.pageSize });
+  if (ordersQuery.status !== "all") params.set("status", ordersQuery.status);
+  if (ordersQuery.q) params.set("q", ordersQuery.q);
+  return params;
+}
+
+async function loadOrdersPage() {
+  const { orders, total } = await Api.get(`/api/orders?${ordersApiParams()}`);
+  document.getElementById("orders-toolbar-count").textContent = `共 ${total} 筆訂單`;
+  renderOrdersTable(orders, total);
+}
+
+async function refreshOrdersSummary() {
+  const summary = await Api.get("/api/orders/summary");
+  document.getElementById("orders-stats-wrap").innerHTML = renderStats(summary);
+  document.getElementById("orders-chart-wrap").innerHTML = renderRevenueChart(summary.dailyRevenue);
+}
+
+// 訂單詳情頁沒有統計卡／圖表可更新，但側邊欄的待處理徽章仍要跟著狀態變更走
+async function refreshPendingBadge() {
+  const { pendingCount } = await Api.get("/api/orders/summary");
+  const badge = document.getElementById("nav-pending");
+  badge.textContent = pendingCount;
+  badge.hidden = pendingCount === 0;
+}
+
 async function renderOrders() {
   setHeader("訂單管理", "前台送出的訂單即時進來，狀態變更會同步回客戶的訂單追蹤頁");
   loading("訂單載入中…");
+  ordersQuery = { page: 1, pageSize: PAGE_SIZE, status: "all", q: "" };
 
-  const { orders } = await Api.get("/api/orders");
-  ordersCache = orders;
-  ordersPage = 1;
+  const [summary, { orders, total }] = await Promise.all([
+    Api.get("/api/orders/summary"),
+    Api.get(`/api/orders?${ordersApiParams()}`),
+  ]);
 
-  if (orders.length === 0) {
+  if (summary.totalCount === 0) {
     viewEl.innerHTML = `<p class="empty-state">目前尚無訂單——請先從前台結帳建立一筆訂單。</p>`;
+    document.getElementById("nav-pending").hidden = true;
     return;
   }
 
   viewEl.innerHTML = `
-    ${renderStats(orders)}
-    ${renderRevenueChart(orders)}
+    <div id="orders-stats-wrap">${renderStats(summary)}</div>
+    <div id="orders-chart-wrap">${renderRevenueChart(summary.dailyRevenue)}</div>
     <div class="admin-toolbar">
       <label class="admin-search">
         ${icon("search", 17)}
@@ -386,24 +386,26 @@ async function renderOrders() {
         ${STATUSES.map((s) => `<option value="${s}">${STATUS_LABEL[s]}</option>`).join("")}
       </select>
       <span class="admin-toolbar__spacer"></span>
-      <span class="admin-toolbar__count">共 ${orders.length} 筆訂單</span>
+      <span class="admin-toolbar__count" id="orders-toolbar-count">共 ${total} 筆訂單</span>
     </div>
     <div id="orders-table-wrap"></div>
   `;
 
-  renderOrdersTable(ordersCache);
+  renderOrdersTable(orders, total);
 
-  const refresh = () => {
-    ordersPage = 1;
-    renderOrdersTable(
-      filterOrders(
-        document.getElementById("order-search").value,
-        document.getElementById("order-status-filter").value
-      )
-    );
-  };
-  document.getElementById("order-search").addEventListener("input", refresh);
-  document.getElementById("order-status-filter").addEventListener("change", refresh);
+  const refresh = debounce(() => {
+    ordersQuery.page = 1;
+    loadOrdersPage();
+  }, 300);
+  document.getElementById("order-search").addEventListener("input", (e) => {
+    ordersQuery.q = e.target.value;
+    refresh();
+  });
+  document.getElementById("order-status-filter").addEventListener("change", (e) => {
+    ordersQuery.status = e.target.value;
+    ordersQuery.page = 1;
+    loadOrdersPage();
+  });
 }
 
 // ---------- 訂單詳情 ----------
@@ -487,7 +489,7 @@ async function renderOrderDetail(id) {
     try {
       await Api.patch(`/api/orders/${order.id}`, { status: statusSelect.value });
       flash("訂單狀態已更新", false);
-      renderOrderDetail(order.id);
+      await Promise.all([renderOrderDetail(order.id), refreshPendingBadge()]);
     } catch (err) {
       flash(err.message);
       statusSelect.value = order.status;
@@ -540,7 +542,11 @@ function renderCatalogTable(products) {
                 (v, i) => `<tr>
               <td data-label="商品">${
                 i === 0
-                  ? `<span class="admin-cell-product"><span class="admin-thumb">${icon("image", 18)}</span><span><b>${esc(p.title)}</b><span class="slug">${esc(p.slug)}</span></span></span>`
+                  ? `<span class="admin-cell-product">${
+                      p.image_url
+                        ? `<img class="admin-thumb" src="${esc(p.image_url)}" alt="">`
+                        : `<span class="admin-thumb">${icon("image", 18)}</span>`
+                    }<span><b>${esc(p.title)}</b><span class="slug">${esc(p.slug)}</span></span></span>`
                   : ""
               }</td>
               <td data-label="分類">${i === 0 ? `<span class="admin-chip">${esc(p.collection)}</span>${p.status === "draft" ? ` <span class="admin-chip">草稿</span>` : ""}` : ""}</td>
@@ -571,7 +577,7 @@ function renderCatalogTable(products) {
   </div>`;
 
   wrap.querySelector(".admin-table-card").appendChild(
-    pager(products.length, catalogPage, (p) => {
+    pager(products.length, catalogPage, PAGE_SIZE, (p) => {
       catalogPage = p;
       renderCatalogTable(products);
     })
@@ -728,6 +734,114 @@ async function renderCatalog() {
 
 // ---------- 商品新增／編輯表單 ----------
 
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const IMAGE_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// 新商品還沒有 id，沒地方可以上傳（圖片存 R2 的 key 帶著商品 id），所以
+// 只在編輯既有商品時才顯示真的上傳介面；新增時先只能填圖片來源代稱。
+function productImageCardHTML(product, isEdit) {
+  const seedField = `<div class="admin-field" style="margin-top:14px;">
+    <label for="f-image-seed">圖片來源代稱</label>
+    <input type="text" id="f-image-seed" value="${esc(product.image_seed || "")}" placeholder="與網址代稱相同">
+    <span class="admin-field__hint">${
+      product.image_url
+        ? "目前前台顯示的是上傳的圖片；移除後才會改用這個代稱對應的精選圖庫。"
+        : "對應資料表的 image_seed 欄位，留空則沿用網址代稱。"
+    }</span>
+  </div>`;
+
+  if (!isEdit) {
+    return `<div class="admin-card">
+      <div class="admin-card__head"><h2>商品圖片</h2></div>
+      <div class="admin-dropzone">
+        ${icon("upload", 26)}
+        <b>先建立商品後才能上傳圖片</b>
+        <span>儲存商品後回來即可上傳，目前先用下方的圖片來源代稱</span>
+      </div>
+      ${seedField}
+    </div>`;
+  }
+
+  const body = product.image_url
+    ? `<div class="admin-image-preview">
+        <img src="${esc(product.image_url)}" alt="">
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn--outline btn--small" type="button" id="replace-image">更換圖片</button>
+          <button class="btn btn--small" type="button" id="remove-image" style="background:#fff;border-color:#f3c5c9;color:var(--color-error)">移除圖片</button>
+        </div>
+      </div>`
+    : `<div class="admin-dropzone" id="image-dropzone" style="cursor:pointer;">
+        ${icon("upload", 26)}
+        <b>拖曳圖片到這裡，或點擊選擇檔案</b>
+        <span>JPG、PNG 或 WebP，5MB 以內</span>
+      </div>`;
+
+  return `<div class="admin-card">
+    <div class="admin-card__head"><h2>商品圖片</h2></div>
+    <input type="file" id="f-image-file" accept="${IMAGE_ALLOWED_TYPES.join(",")}" hidden>
+    ${body}
+    ${seedField}
+  </div>`;
+}
+
+// 上傳／移除圖片後，表單直接整頁重畫最單純：不用另外同步預覽狀態，
+// 也順便讓「圖片來源代稱」欄位下方的提示文字跟著換。
+function wireProductImageUpload(productId) {
+  const fileInput = document.getElementById("f-image-file");
+  if (!fileInput) return;
+
+  const openPicker = () => fileInput.click();
+  document.getElementById("image-dropzone")?.addEventListener("click", openPicker);
+  document.getElementById("replace-image")?.addEventListener("click", openPicker);
+
+  document.getElementById("remove-image")?.addEventListener("click", async () => {
+    if (!confirm("確定要移除這張圖片嗎？")) return;
+    try {
+      await Api.delete(`/api/admin/products/${productId}/image`);
+      flash("圖片已移除", false);
+      renderProductForm(productId);
+    } catch (err) {
+      flash(err.message);
+    }
+  });
+
+  const uploadFile = async (file) => {
+    if (!IMAGE_ALLOWED_TYPES.includes(file.type)) {
+      flash("僅支援 JPG、PNG 或 WebP 格式");
+      return;
+    }
+    if (file.size > IMAGE_MAX_BYTES) {
+      flash("圖片大小不能超過 5MB");
+      return;
+    }
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      await Api.upload(`/api/admin/products/${productId}/image`, form);
+      flash("圖片已上傳", false);
+      renderProductForm(productId);
+    } catch (err) {
+      flash(err.message);
+    }
+  };
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) uploadFile(fileInput.files[0]);
+  });
+
+  const dropzone = document.getElementById("image-dropzone");
+  dropzone?.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("is-dragover");
+  });
+  dropzone?.addEventListener("dragleave", () => dropzone.classList.remove("is-dragover"));
+  dropzone?.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("is-dragover");
+    if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+  });
+}
+
 function variantRow(variant = {}) {
   const row = document.createElement("div");
   row.className = "admin-variant-row";
@@ -756,7 +870,8 @@ async function renderProductForm(productId) {
   setHeader(
     isEdit ? "編輯商品" : "新增商品",
     isEdit ? `${product.title}　·　建立於 ${shortDate(product.created_at)}` : "填寫商品資料後即可上架，或先存成草稿",
-    `<button class="btn btn--small" type="button" id="cancel-product" style="background:#fff;border-color:var(--color-border);color:var(--color-text)">取消</button>
+    `${isEdit ? `<button class="btn btn--small" type="button" id="delete-product" style="background:#fff;border-color:#f3c5c9;color:var(--color-error)">刪除商品</button>` : ""}
+     <button class="btn btn--small" type="button" id="cancel-product" style="background:#fff;border-color:var(--color-border);color:var(--color-text)">取消</button>
      <button class="btn btn--accent btn--small" type="button" id="save-product">${isEdit ? "儲存商品" : "建立商品"}</button>`
   );
 
@@ -832,19 +947,7 @@ async function renderProductForm(productId) {
           </select>
           <p class="admin-hint">五大分類：${COLLECTIONS.join("、")}。</p>
         </div>
-        <div class="admin-card">
-          <div class="admin-card__head"><h2>商品圖片</h2></div>
-          <div class="admin-dropzone">
-            ${icon("upload", 26)}
-            <b>本 Demo 未接圖片上傳</b>
-            <span>前台以下方的圖片來源代稱決定要顯示哪張圖</span>
-          </div>
-          <div class="admin-field" style="margin-top:14px;">
-            <label for="f-image-seed">圖片來源代稱</label>
-            <input type="text" id="f-image-seed" value="${esc(product.image_seed || "")}" placeholder="與網址代稱相同">
-            <span class="admin-field__hint">對應資料表的 image_seed 欄位，留空則沿用網址代稱。</span>
-          </div>
-        </div>
+        ${productImageCardHTML(product, isEdit)}
       </div>
     </div>
   `;
@@ -853,9 +956,22 @@ async function renderProductForm(productId) {
   (product.variants.length ? product.variants : []).forEach((v) => rows.appendChild(variantRow(v)));
   document.getElementById("add-variant").addEventListener("click", () => rows.appendChild(variantRow()));
 
+  if (isEdit) wireProductImageUpload(productId);
+
   const leave = () => switchView("catalog");
   document.getElementById("back-to-catalog").addEventListener("click", leave);
   actionsEl.querySelector("#cancel-product").addEventListener("click", leave);
+
+  actionsEl.querySelector("#delete-product")?.addEventListener("click", async () => {
+    if (!confirm(`確定要刪除「${product.title}」嗎？此操作無法復原，商品的規格與評價會一併刪除。`)) return;
+    try {
+      await Api.delete(`/api/products/${productId}`);
+      flash("商品已刪除", false);
+      switchView("catalog");
+    } catch (err) {
+      flash(err.message);
+    }
+  });
 
   actionsEl.querySelector("#save-product").addEventListener("click", async (e) => {
     const price = Number(document.getElementById("f-price").value);

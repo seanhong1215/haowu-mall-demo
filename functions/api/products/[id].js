@@ -168,3 +168,29 @@ async function updateWholeProduct(env, id, body) {
 
   return json({ product: { ...product, variants } });
 }
+
+// DELETE /api/products/:id — admin only。連同規格與評價一起刪除；
+// 過去訂單裡的品項是下單當下的快照（order_items 不外鍵參照 products），
+// 所以刪除商品不會動到既有訂單紀錄。
+export async function onRequestDelete({ request, params, env }) {
+  if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
+
+  const id = Number(params.id);
+  if (!Number.isFinite(id)) return errorJson("商品編號無效", 400);
+
+  const product = await env.DB.prepare(`SELECT title, image_url FROM products WHERE id = ?`).bind(id).first();
+  if (!product) return errorJson("找不到此商品", 404);
+
+  const oldKey = /^\/api\/images\/(.+)$/.exec(product.image_url || "")?.[1];
+  if (oldKey) await env.PRODUCT_IMAGES.delete(oldKey).catch(() => {});
+
+  await env.DB.batch([
+    env.DB.prepare(`DELETE FROM reviews WHERE product_id = ?`).bind(id),
+    env.DB.prepare(`DELETE FROM product_variants WHERE product_id = ?`).bind(id),
+    env.DB.prepare(`DELETE FROM products WHERE id = ?`).bind(id),
+  ]);
+
+  await logAdminAction(env, "product_deleted", `刪除商品「${product.title}」`);
+
+  return json({ ok: true });
+}

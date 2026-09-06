@@ -9,9 +9,37 @@ const FLAT_SHIPPING_CENTS = 8000; // NT$80 flat-rate home delivery
 // needs a market where tax is added on top.
 const TAX_RATE = 0;
 
-// GET /api/orders — admin only, list of orders (newest first)
+const STATUSES = ["pending", "paid", "fulfilled", "cancelled"];
+const PAGE_SIZE_MAX = 50;
+
+// GET /api/orders?page=1&pageSize=10&status=pending&q=王小明 — admin only.
+// Server-side pagination — the admin dashboard used to fetch every order and
+// paginate/filter in the browser, which doesn't scale past a small demo
+// dataset. Filtering happens in SQL; the client only ever holds one page.
 export async function onRequestGet({ request, env }) {
   if (!(await requireAdmin(request, env))) return errorJson("未授權，請重新登入後台", 401);
+
+  const url = new URL(request.url);
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, Number(url.searchParams.get("pageSize")) || 10));
+  const status = url.searchParams.get("status");
+  const q = url.searchParams.get("q")?.trim();
+
+  const where = [];
+  const binds = [];
+  if (status && STATUSES.includes(status)) {
+    where.push(`status = ?`);
+    binds.push(status);
+  }
+  if (q) {
+    where.push(`(order_number LIKE ? OR customer_name LIKE ? OR customer_email LIKE ?)`);
+    binds.push(`%${q}%`, `%${q}%`, `%${q}%`);
+  }
+  const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const { total } = await env.DB.prepare(`SELECT COUNT(*) AS total FROM orders ${whereClause}`)
+    .bind(...binds)
+    .first();
 
   // 後台列表要在不展開訂單的情況下看出買了什麼，所以多帶第一項商品名稱
   // 與總件數，讓前端組成「防水藍牙喇叭 等 2 件」這樣的摘要。
@@ -19,9 +47,14 @@ export async function onRequestGet({ request, env }) {
     `SELECT o.*,
             (SELECT title FROM order_items WHERE order_id = o.id ORDER BY id LIMIT 1) AS first_item_title,
             (SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE order_id = o.id) AS item_count
-     FROM orders o ORDER BY o.created_at DESC`
-  ).all();
-  return json({ orders });
+     FROM orders o ${whereClause}
+     ORDER BY o.created_at DESC
+     LIMIT ? OFFSET ?`
+  )
+    .bind(...binds, pageSize, (page - 1) * pageSize)
+    .all();
+
+  return json({ orders, total, page, pageSize });
 }
 
 // POST /api/orders — public checkout endpoint.
