@@ -23,6 +23,16 @@ const Api = {
     });
     return Api._handle(res);
   },
+  async delete(path) {
+    const res = await fetch(path, { method: "DELETE", credentials: "include" });
+    return Api._handle(res);
+  },
+  // multipart/form-data upload — no Content-Type header, the browser sets
+  // its own boundary. Used for the admin product image upload only.
+  async upload(path, formData) {
+    const res = await fetch(path, { method: "POST", credentials: "include", body: formData });
+    return Api._handle(res);
+  },
   async _handle(res) {
     let data = null;
     try {
@@ -156,6 +166,17 @@ function imageUrl(seed, index = 1, w = 900, h = 1125) {
   const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
   _placeholderCache.set(cacheKey, uri);
   return uri;
+}
+
+// A product with an admin-uploaded photo (products.image_url, served out of
+// R2 via /api/images/:key) shows that instead of the curated stock photo.
+// `source` is a product row (image_url/image_seed) or a cart line (the
+// same two fields camelCased) — both shapes are used across the storefront.
+function productImageUrl(source, index = 1, w = 900, h = 1125) {
+  const uploaded = source?.image_url ?? source?.imageUrl;
+  if (uploaded) return uploaded;
+  const seed = source?.image_seed ?? source?.imageSeed ?? source;
+  return imageUrl(seed, index, w, h);
 }
 
 // Marketing banners (homepage hero, "about us" split section) had the same

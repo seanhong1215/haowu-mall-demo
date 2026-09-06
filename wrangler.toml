@@ -16,3 +16,10 @@ run_worker_first = ["/api/*"]
 binding = "DB"
 database_name = "haowu_mall"
 database_id = "5a6b3249-e865-434d-a2e2-dd9df4c7600e"
+
+# R2 bucket for admin-uploaded product photos. Served back out through
+# /api/images/:key (see functions/api/images/[key].js) since R2 objects
+# aren't public by default.
+[[r2_buckets]]
+binding = "PRODUCT_IMAGES"
+bucket_name = "haowu-mall-product-images"

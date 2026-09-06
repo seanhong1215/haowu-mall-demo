@@ -202,7 +202,7 @@ function updateCartUI() {
     .map(
       (l) => `
     <div class="cart-line" data-product="${l.productId}" data-variant="${l.variantId ?? ""}">
-      <img src="${imageUrl(l.imageSeed, 1, 160, 160)}" alt="${l.title}">
+      <img src="${productImageUrl(l, 1, 160, 160)}" alt="${l.title}">
       <div class="cart-line__info">
         <div class="cart-line__title">${l.title}</div>
         ${l.variantLabel ? `<div class="cart-line__variant">${l.variantLabel}</div>` : ""}

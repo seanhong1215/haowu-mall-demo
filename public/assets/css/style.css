@@ -877,6 +877,7 @@ body.cart-open .cart-drawer { transform: translateX(0); }
   width: 40px; height: 40px; border-radius: 3px; background: var(--color-media-frame);
   border: 1px solid var(--color-border); color: #ccc;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  object-fit: cover; /* 有上傳圖片時這個標籤是 <img>，其餘情況是圖示佔位 */
 }
 .admin-cell-product { display: flex; align-items: center; gap: 12px; }
 .admin-cell-product b { display: block; font-weight: 700; }
@@ -1016,6 +1017,11 @@ body.cart-open .cart-drawer { transform: translateX(0); }
 .admin-dropzone svg { color: #b8b8b8; }
 .admin-dropzone b { font-size: 0.86rem; font-weight: 700; }
 .admin-dropzone span { font-size: 0.76rem; color: var(--color-text-muted); }
+.admin-dropzone.is-dragover { border-color: var(--color-accent); background: #fdf7f8; }
+.admin-image-preview img {
+  display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: var(--radius); border: 1px solid var(--color-border); background: var(--color-media-frame);
+}
 
 /* ---------- 會員 ---------- */
 .admin-avatar {
