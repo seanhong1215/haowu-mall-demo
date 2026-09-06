@@ -108,6 +108,7 @@ npm test              # 跑 functions/ 的自動化測試（vitest + Workers 執
 ```bash
 npx wrangler login
 npx wrangler d1 create haowu_mall     # 回傳的 database_id 填進 wrangler.toml
+npx wrangler r2 bucket create haowu-mall-product-images   # 商品上傳圖片用
 npm run db:init:remote
 npm run deploy
 ```

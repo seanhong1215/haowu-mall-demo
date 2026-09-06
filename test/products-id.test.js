@@ -141,6 +141,23 @@ describe("DELETE /api/products/:id", () => {
     expect(reviews.results).toHaveLength(0);
   });
 
+  it("also deletes the product's uploaded photo from R2", async () => {
+    const product = await getProductBySlug("ceramic-vase");
+    const key = "product-photo-cleanup-test.jpg";
+    await env.PRODUCT_IMAGES.put(key, new Uint8Array([1, 2, 3]));
+    await env.DB.prepare(`UPDATE products SET image_url = ? WHERE id = ?`)
+      .bind(`/api/images/${key}`, product.id)
+      .run();
+
+    const res = await onRequestDelete({
+      request: await adminJsonRequest(`https://example.com/api/products/${product.id}`, { method: "DELETE" }),
+      params: { id: String(product.id) },
+      env,
+    });
+    expect(res.status).toBe(200);
+    expect(await env.PRODUCT_IMAGES.get(key)).toBeNull();
+  });
+
   it("rejects an unauthenticated request", async () => {
     const product = await getProductBySlug("ceramic-vase");
     const res = await onRequestDelete({
