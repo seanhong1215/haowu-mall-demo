@@ -18,7 +18,7 @@ function renderCartPage() {
     <tr data-product="${l.productId}" data-variant="${l.variantId ?? ""}">
       <td>
         <div style="display:flex;gap:14px;">
-          <img src="${imageUrl(l.imageSeed, 1, 160, 160)}" alt="" style="width:76px;height:76px;object-fit:cover;border-radius:2px;">
+          <img src="${productImageUrl(l, 1, 160, 160)}" alt="" style="width:76px;height:76px;object-fit:cover;border-radius:2px;">
           <div>
             <div>${l.title}</div>
             ${l.variantLabel ? `<div class="text-muted" style="font-size:0.85rem;">${l.variantLabel}</div>` : ""}

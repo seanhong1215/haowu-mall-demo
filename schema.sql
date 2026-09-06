@@ -20,6 +20,9 @@ CREATE TABLE products (
   price_cents INTEGER NOT NULL,
   compare_at_price_cents INTEGER,
   image_seed TEXT NOT NULL,
+  -- 後台上傳的商品照，存在 R2、這裡存可直接當 <img src> 用的路徑
+  -- （/api/images/:key）。有值時蓋過 image_seed 對應的精選圖庫。
+  image_url TEXT,
   -- 'active'：前台可見；'draft'：僅後台可見，用於還沒準備好上架的商品
   status TEXT NOT NULL DEFAULT 'active',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))

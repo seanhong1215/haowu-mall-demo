@@ -21,7 +21,7 @@ function productCardHTML(p, rank) {
           ${onSale ? `<span class="product-card__badge">省${discountPct}%</span>` : ""}
           ${!inStock ? `<span class="product-card__badge product-card__badge--sold-out">已售完</span>` : ""}
         </div>
-        <img src="${imageUrl(p.image_seed, 1, 500, 500)}" alt="${p.title}" loading="lazy">
+        <img src="${productImageUrl(p, 1, 500, 500)}" alt="${p.title}" loading="lazy">
       </div>
       <div class="product-card__body">
         <div class="product-card__title">${p.title}</div>

@@ -63,7 +63,7 @@ function stockNote(inventory) {
 
 function renderGallery(p) {
   const main = document.getElementById("gallery-main");
-  main.src = imageUrl(p.image_seed, selectedImageIndex, 900, 900);
+  main.src = productImageUrl(p, selectedImageIndex, 900, 900);
   main.alt = p.title;
 
   const thumbs = document.getElementById("gallery-thumbs");
@@ -71,7 +71,7 @@ function renderGallery(p) {
     .map(
       (i) => `
       <button aria-current="${i === selectedImageIndex}" data-index="${i}">
-        <img src="${imageUrl(p.image_seed, i, 160, 160)}" alt="">
+        <img src="${productImageUrl(p, i, 160, 160)}" alt="">
       </button>`
     )
     .join("");
@@ -240,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
       variantLabel: variant ? `${variant.option_name}: ${variant.value}` : null,
       priceCents: currentProduct.price_cents,
       imageSeed: currentProduct.image_seed,
+      imageUrl: currentProduct.image_url,
       quantity,
       maxInventory: variant ? variant.inventory : 99,
     });
